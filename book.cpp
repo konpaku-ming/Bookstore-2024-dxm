@@ -1,5 +1,7 @@
 #include "book.h"
 
+#include <cstring>
+
 bool IsIsbn(const string &s) { // 检查是否为合法的ISBN
   if (s.empty() || s.length() > isbn_len) {
     return false;
@@ -73,6 +75,7 @@ Book::Book(const string &isbn_, const string &keyword_, const string &name_,
   quantity = quantity_;
   price = price_;
 }
+Book::~Book() = default;
 
 string Book::GetIsbn() const { return isbn; }
 

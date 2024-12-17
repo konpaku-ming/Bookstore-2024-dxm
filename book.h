@@ -1,6 +1,5 @@
 #ifndef BOOK_H
 #define BOOK_H
-#include <cstring>
 #include <string>
 using std::string;
 constexpr int isbn_len = 20, keyword_len = 60, name_len = 60;
@@ -17,6 +16,7 @@ public:
   Book(const string &isbn_, const string &keyword_ = "",
        const string &name_ = "", const string &author_ = "",
        long long quantity_, double price_);
+  ~Book();
   string GetIsbn() const;
   string GetName() const;
   string GetAuthor() const;
