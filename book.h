@@ -56,5 +56,7 @@ public:
   bool operator==(const Book &a, const Book &b) const {
     return strcmp(a.isbn, b.isbn) == 0;
   }
+
+  bool KeywordJudge(const string &) const;
 };
 #endif // BOOK_H

@@ -112,8 +112,35 @@ void Book::ModifyKeyword(const string &s) {
 void Book::ModifyPrice(const double x) { price = x; }
 
 void Book::ModifyQuantity(const long long x) {
-  if(quantity < x) {
+  if (quantity < x) {
     return;
   }
   quantity -= x;
+}
+
+bool Book::KeywordJudge(const string &s) const {
+  int r = 0, l = 0;
+  const string str = this->GetKeyword();
+  while (r != str.length()) {
+    while (str[r] != '|') {
+      r++;
+    }
+    if (r - l != s.length())
+      continue;
+    for (int i = 0; i < s.length(); i++) {
+      if (s[i] != str[r + i])
+        break;
+      if (i == s.length() - 1)
+        return true;
+    }
+    l = r + 1;
+  }
+  if (r - l != s.length())
+    return false;
+  for (int i = 0; i < s.length(); i++) {
+    if (s[i] != str[r + i])
+      break;
+    if (i == s.length() - 1)return true;
+  }
+  return false;
 }

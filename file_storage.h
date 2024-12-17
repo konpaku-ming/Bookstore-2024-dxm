@@ -201,7 +201,84 @@ public:
   }
 
   void name_show(char name[name_len + 1]) {
+    bool flag = false;
+    if (book_system.total == 0) {
+      // 在链表头存入
+      cout << "\n";
+      return;
+    }
+    Block *cur = &head;
+    auto temp = new Book;
+    while (cur != nullptr) {
+      for (int i = 0; i < cur->size; i++) {
+        book_system.Read(*temp, i);
+        if (strcmp(name, temp->GetName().data()) == 0) {
+          // 相同书名
+          flag = true;
+          cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
+               << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
+               << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
+               << temp->GetQuantity() << "\n";
+        }
+      }
+      cur = cur->next;
+    }
+    if (!flag)
+      cout << "\n";
+  }
 
+  void author_show(char author[name_len + 1]) {
+    bool flag = false;
+    if (book_system.total == 0) {
+      // 在链表头存入
+      cout << "\n";
+      return;
+    }
+    Block *cur = &head;
+    auto temp = new Book;
+    while (cur != nullptr) {
+      for (int i = 0; i < cur->size; i++) {
+        book_system.Read(*temp, i);
+        if (strcmp(author, temp->GetAuthor().data()) == 0) {
+          // 相同作者
+          flag = true;
+          cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
+               << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
+               << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
+               << temp->GetQuantity() << "\n";
+        }
+      }
+      cur = cur->next;
+    }
+    if (!flag)
+      cout << "\n";
+  }
+
+  void keyword_show(const string &s) {
+    bool flag = false;
+    if (book_system.total == 0) {
+      // 在链表头存入
+      cout << "\n";
+      return;
+    }
+    Block *cur = &head;
+    auto temp = new Book;
+    while (cur != nullptr) {
+      for (int i = 0; i < cur->size; i++) {
+        book_system.Read(*temp, i);
+        if (temp->KeywordJudge(s)) {
+          // 是关键字
+          flag = true;
+          cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
+               << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
+               << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
+               << temp->GetQuantity() << "\n";
+        }
+      }
+      cur = cur->next;
+    }
+    if (!flag)
+      cout << "\n";
   }
 };
 
