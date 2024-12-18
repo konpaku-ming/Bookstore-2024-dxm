@@ -1,6 +1,7 @@
 #include "account.h"
 
 #include <cstring>
+
 bool IsChar(const char ch) {
   // 数字，字母，下划线
   if (ch == '_' || (ch > 47 && ch < 58) || (ch > 64 && ch < 91) ||
@@ -10,7 +11,8 @@ bool IsChar(const char ch) {
   return false;
 }
 
-bool IsId(const string &s) { // 检查是否为合法的Id
+bool IsId(const string &s) {
+  // 检查是否为合法的Id
   if (s.empty() || s.length() > id_len) {
     return false;
   }
@@ -21,7 +23,8 @@ bool IsId(const string &s) { // 检查是否为合法的Id
   return true;
 }
 
-bool IsName(const string &s) { // 检查是否为合法的用户名
+bool IsName(const string &s) {
+  // 检查是否为合法的用户名
   if (s.empty() || s.length() > name_len) {
     return false;
   }
@@ -32,7 +35,8 @@ bool IsName(const string &s) { // 检查是否为合法的用户名
   return true;
 }
 
-bool IsPassword(const string &s) { // 检查是否为合法的密码
+bool IsPassword(const string &s) {
+  // 检查是否为合法的密码
   if (s.empty() || s.length() > password_len) {
     return false;
   }
@@ -45,6 +49,7 @@ bool IsPassword(const string &s) { // 检查是否为合法的密码
 
 bool IsPrivilege(const int x) {
   if (x == 1 || x == 3 || x == 7) {
+    // 检查是否为合法的权限
     return true;
   }
   return false;
@@ -69,3 +74,8 @@ string Account::GetId() const { return id; }
 string Account::GetName() const { return name; }
 
 int Account::GetPrivilege() const { return privilege; }
+
+void Account::ModifyPassword(char new_password[password_len + 1])
+{
+  strcpy(this->password, new_password);
+}
