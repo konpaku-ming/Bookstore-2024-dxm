@@ -4,8 +4,7 @@
 using std::string;
 constexpr int id_len = 30, password_len = 30, name_len = 30;
 
-class Account
-{
+class Account {
 private:
   char id[id_len + 1]{}, password[password_len + 1]{}, name[name_len + 1]{};
   int privilege = 0;
@@ -13,7 +12,7 @@ private:
 public:
   Account();
 
-  Account(const string& id_, const string& password_, const string& name_,
+  Account(const string &id_, const string &password_, const string &name_,
           int privilege_);
 
   ~Account();

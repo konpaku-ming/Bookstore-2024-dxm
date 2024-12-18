@@ -2,7 +2,8 @@
 
 #include <cstring>
 
-bool IsIsbn(const string &s) { // 检查是否为合法的ISBN
+bool IsIsbn(const string &s) {
+  // 检查是否为合法的ISBN
   if (s.empty() || s.length() > isbn_len) {
     return false;
   }
@@ -13,7 +14,8 @@ bool IsIsbn(const string &s) { // 检查是否为合法的ISBN
   return true;
 }
 
-bool IsName(const string &s) { // 检查是否为合法的书名
+bool IsName(const string &s) {
+  // 检查是否为合法的书名
   if (s.empty() || s.length() > name_len) {
     return false;
   }
@@ -24,7 +26,8 @@ bool IsName(const string &s) { // 检查是否为合法的书名
   return true;
 }
 
-bool IsAuthor(const string &s) { // 检查是否为合法的作者名
+bool IsAuthor(const string &s) {
+  // 检查是否为合法的作者名
   if (s.empty() || s.length() > name_len) {
     return false;
   }
@@ -75,6 +78,7 @@ Book::Book(const string &isbn_, const string &keyword_, const string &name_,
   quantity = quantity_;
   price = price_;
 }
+
 Book::~Book() = default;
 
 string Book::GetIsbn() const { return isbn; }

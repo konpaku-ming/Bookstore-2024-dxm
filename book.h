@@ -4,6 +4,7 @@
 #include <string>
 using std::string;
 constexpr int isbn_len = 20, keyword_len = 60, name_len = 60;
+
 class Book {
 private:
   char isbn[isbn_len + 1]{}, keyword[keyword_len + 1]{}, name[name_len + 1]{},

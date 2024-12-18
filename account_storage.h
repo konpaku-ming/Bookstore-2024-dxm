@@ -18,7 +18,7 @@ class AccountManage {
 private:
   std::string file_name;
   std::fstream account_data;
-  int total = 0; // 留一个int存储总本数
+  int total = 0; // 留一个int存储用户总数
 
 public:
   AccountManage() = default;
@@ -36,6 +36,8 @@ public:
     account_data.open(file_name, std::ios_base::out);
     account_data.close();
     account_data.open(file_name, std::ios_base::in | std::ios_base::out);
+    Account administer("root", "sjtu", "root", 7);
+    Push(administer);
   }
 
   void Read(Account &dest, const int n) {
