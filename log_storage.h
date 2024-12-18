@@ -13,10 +13,12 @@ public:
   FinanceDatabase(const string &file_name) : file_name(file_name) {}
 
   void initialise(string FN = "") {
+    /*
     if (access(file_name.c_str(), F_OK) == 0) {
       // 检查文件是否存在
       return;
     }
+    */
     if (FN != "") {
       file_name = FN;
     }

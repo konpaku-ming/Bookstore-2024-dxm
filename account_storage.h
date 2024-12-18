@@ -26,10 +26,12 @@ public:
   ~AccountManage() { account_data.close(); }
 
   void initialize(string FN = "") {
+    /*
     if (access(file_name.c_str(), F_OK) == 0) {
       // 检查文件是否存在
       return;
     }
+    */
     if (FN != "") {
       file_name = FN;
     }
@@ -65,10 +67,11 @@ private:
   AccountManage account_system;
   std::vector<int> idx;
   int cnt = 0;
-  int cur_idx = 0;
-  int cur_privilege = 0;
 
 public:
+  int cur_privilege = 0;
+  int cur_idx = 0;
+
   AccountDatabase() = default;
 
   ~AccountDatabase() = default;
@@ -78,12 +81,12 @@ public:
     account_system.initialize("accountsystem");
   }
 
-  bool Login(char id[id_len + 1], char password_[password_len + 1] = {}) {
+  bool Login(char id[id_len + 1], const char password_[password_len + 1]) {
     auto cur = new Account;
     for (int i = 0; i < account_system.total; i++) {
       account_system.Read(*cur, idx[i]);
       if (strcmp(cur->GetId().data(), id) == 0) {
-        if (cur_privilege > cur->GetPrivilege()) {
+        if (cur_privilege > cur->GetPrivilege() && password_ == "") {
           cur_privilege = cur->GetPrivilege();
           cur_idx = idx[i];
           delete cur;
@@ -101,6 +104,24 @@ public:
     }
     delete cur;
     return false;
+  }
+
+  void EnforcingLogin(char id[id_len + 1]) {
+    auto cur = new Account;
+    for (int i = 0; i < account_system.total; i++) {
+      account_system.Read(*cur, idx[i]);
+      if (strcmp(cur->GetId().data(), id) == 0) {
+        if (cur_privilege > cur->GetPrivilege()) {
+          cur_privilege = cur->GetPrivilege();
+          cur_idx = idx[i];
+          delete cur;
+          return;
+        }
+        delete cur;
+        return;
+      }
+    }
+    delete cur;
   }
 
   bool Signup(Account &x) {
@@ -122,7 +143,8 @@ public:
     return true;
   }
 
-  bool ChangePassword(char id[id_len + 1], char password[password_len + 1] = {},
+  bool ChangePassword(char id[id_len + 1],
+                      const char password[password_len + 1],
                       char new_password[password_len + 1]) {
     if (cur_privilege < 1)
       return false;
@@ -130,7 +152,7 @@ public:
     for (int i = 0; i < account_system.total; i++) {
       account_system.Read(*cur, idx[i]);
       if (strcmp(cur->GetId().data(), id) == 0) {
-        if (cur_privilege == 7) {
+        if (cur_privilege == 7 && password == "") {
           cur->ModifyPassword(new_password);
           delete cur;
           return true;

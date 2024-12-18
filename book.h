@@ -15,9 +15,8 @@ private:
 public:
   Book();
 
-  Book(const string &isbn_, const string &keyword_ = "",
-       const string &name_ = "", const string &author_ = "",
-       long long quantity_, double price_);
+  Book(const string &isbn_, const string &keyword_, const string &name_,
+       const string &author_, long long quantity_, double price_);
 
   ~Book();
 
@@ -45,17 +44,11 @@ public:
 
   bool ModifyQuantity(long long);
 
-  bool operator>(const Book &a, const Book &b) const {
-    return strcmp(a.isbn, b.isbn) > 0;
-  }
+  bool operator>(const Book &x) const { return strcmp(isbn, x.isbn) > 0; }
 
-  bool operator<(const Book &a, const Book &b) const {
-    return strcmp(a.isbn, b.isbn) < 0;
-  }
+  bool operator<(const Book &x) const { return strcmp(isbn, x.isbn) < 0; }
 
-  bool operator==(const Book &a, const Book &b) const {
-    return strcmp(a.isbn, b.isbn) == 0;
-  }
+  bool operator==(const Book &x) const { return strcmp(isbn, x.isbn) == 0; }
 
   bool KeywordJudge(const string &) const;
 };

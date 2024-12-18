@@ -1,7 +1,5 @@
 #include "account.h"
 
-#include <cstring>
-
 bool IsChar(const char ch) {
   // 数字，字母，下划线
   if (ch == '_' || (ch > 47 && ch < 58) || (ch > 64 && ch < 91) ||
@@ -23,9 +21,9 @@ bool IsId(const string &s) {
   return true;
 }
 
-bool IsName(const string &s) {
+bool IsUserName(const string &s) {
   // 检查是否为合法的用户名
-  if (s.empty() || s.length() > name_len) {
+  if (s.empty() || s.length() > username_len) {
     return false;
   }
   for (int i = 0; i < s.length(); i++) {
@@ -75,7 +73,6 @@ string Account::GetName() const { return name; }
 
 int Account::GetPrivilege() const { return privilege; }
 
-void Account::ModifyPassword(char new_password[password_len + 1])
-{
+void Account::ModifyPassword(char new_password[password_len + 1]) {
   strcpy(this->password, new_password);
 }

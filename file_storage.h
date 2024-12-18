@@ -1,9 +1,6 @@
 #ifndef FILE_STORAGE_H
 #define FILE_STORAGE_H
 
-#ifndef BPT_MEMORYRIVER_HPP
-#define BPT_MEMORYRIVER_HPP
-
 #include "book.h"
 #include <cstring>
 #include <fstream>
@@ -15,12 +12,12 @@ using std::cout;
 using std::string;
 constexpr int max_size = 500;
 class BookDatabase;
+
 // 图书的总数据库
 class BookManage {
   friend BookDatabase;
 
 private:
-  Book book;
   std::string file_name;
   std::fstream book_data;
   int total = 0; // 留一个int存储总本数
@@ -28,15 +25,15 @@ private:
 public:
   BookManage() = default;
 
-  BookManage(const std::string &FN) {}
-
   ~BookManage() { book_data.close(); }
 
   void initialize(string FN = "") {
+    /*
     if (access(file_name.c_str(), F_OK) == 0) {
       // 检查文件是否存在
       return;
     }
+    */
     if (FN != "") {
       file_name = FN;
     }
@@ -89,7 +86,6 @@ public:
   }
 
   void Insert(Book &x) {
-    book_system.total++;
     if (book_system.total == 0) {
       // 在链表头存入
       head.index[head.size] = book_system.Push(x);
@@ -356,5 +352,4 @@ public:
   }
 };
 
-#endif // BPT_MEMORYRIVER_HPP
 #endif //FILE_STORAGE_H

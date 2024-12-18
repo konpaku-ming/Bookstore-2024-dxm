@@ -1,12 +1,14 @@
 #ifndef ACCOUNT_H
 #define ACCOUNT_H
+
+#include <cstring>
 #include <string>
 using std::string;
-constexpr int id_len = 30, password_len = 30, name_len = 30;
+constexpr int id_len = 30, password_len = 30, username_len = 30;
 
 class Account {
 private:
-  char id[id_len + 1]{}, password[password_len + 1]{}, name[name_len + 1]{};
+  char id[id_len + 1]{}, password[password_len + 1]{}, name[username_len + 1]{};
   int privilege = 0;
 
 public:
@@ -26,4 +28,15 @@ public:
 
   void ModifyPassword(char new_password[password_len + 1]);
 };
+
+bool IsChar(char ch);
+
+bool IsId(const string &s);
+
+bool IsUserName(const string &s);
+
+bool IsPassword(const string &s);
+
+bool IsPrivilege(int x);
+
 #endif // ACCOUNT_H
