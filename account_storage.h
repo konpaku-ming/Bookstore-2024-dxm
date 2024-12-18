@@ -65,8 +65,8 @@ public:
 class AccountDatabase {
 private:
   AccountManage account_system;
-  std::vector<int> idx;
-  int cnt = 0;
+  std::vector<int> idx = {1};
+  int cnt = 1;
 
 public:
   int cur_privilege = 0;

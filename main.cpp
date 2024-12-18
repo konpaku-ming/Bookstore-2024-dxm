@@ -3,6 +3,8 @@
 #include "book.h"
 #include "file_storage.h"
 #include "log_storage.h"
+
+#include <cassert>
 #include <stack>
 #include <vector>
 
@@ -66,7 +68,7 @@ int main() {
       char password[password_len + 1]{};
       switch (list.size()) {
       case 2: {
-        strcpy(id, list[1].c_str());
+        strcpy(id, list[1].data());
         if (MyUser.Login(id, ""))
           user_stack.push(id);
         else
@@ -74,8 +76,8 @@ int main() {
         break;
       }
       case 3: {
-        strcpy(id, list[1].c_str());
-        strcpy(password, list[2].c_str());
+        strcpy(id, list[1].data());
+        strcpy(password, list[2].data());
         if (MyUser.Login(id, password))
           user_stack.push(id);
         else
@@ -85,6 +87,7 @@ int main() {
       default:
         cout << "Invalid\n";
       }
+      cout << user_stack.top() << "\n"; // TODO delete this
     } else if (list[0] == "logout") {
       if (list.size() != 1 || MyUser.cur_privilege < 1)
         cout << "Invalid\n";
@@ -98,6 +101,7 @@ int main() {
           strcpy(id, user_stack.top().c_str());
           MyUser.EnforcingLogin(id);
         }
+        cout << user_stack.top() << "\n"; // TODO delete this
       }
     } else if (list[0] == "register") {
       if (list.size() != 4) {
