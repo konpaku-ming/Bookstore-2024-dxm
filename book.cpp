@@ -111,11 +111,12 @@ void Book::ModifyKeyword(const string &s) {
 
 void Book::ModifyPrice(const double x) { price = x; }
 
-void Book::ModifyQuantity(const long long x) {
+bool Book::ModifyQuantity(const long long x) {
   if (quantity < x) {
-    return;
+    return false;
   }
   quantity -= x;
+  return true;
 }
 
 bool Book::KeywordJudge(const string &s) const {

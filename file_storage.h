@@ -76,18 +76,20 @@ class BookDatabase {
 private:
   BookManage book_system;
   Block head;
+  int selected_book_idx = 0;
 
 public:
   BookDatabase() = default;
 
   ~BookDatabase() = default;
 
-  void init() {
+  void Init() {
     // 初始化，给文件一个名字
     book_system.initialize("booksystem");
   }
 
-  void insert(Book &x) {
+  void Insert(Book &x) {
+    book_system.total++;
     if (book_system.total == 0) {
       // 在链表头存入
       head.index[head.size] = book_system.Push(x);
@@ -103,7 +105,7 @@ public:
       } else {
         auto temp = new Book;
         for (int i = 0; i < cur->size; i++) {
-          book_system.Read(*temp, i);
+          book_system.Read(*temp, cur->index[i]);
           if (x > *temp) {
             // 大于当前位置
             continue;
@@ -160,10 +162,9 @@ public:
     }
   }
 
-  void isbn_show(char isbn[isbn_len + 1]) {
+  void IsbnShow(char isbn[isbn_len + 1]) {
     bool flag = false;
     if (book_system.total == 0) {
-      // 在链表头存入
       cout << "\n";
       return;
     }
@@ -174,7 +175,7 @@ public:
       } else {
         auto temp = new Book;
         for (int i = 0; i < cur->size; i++) {
-          book_system.Read(*temp, i);
+          book_system.Read(*temp, cur->index[i]);
           if (strcmp(isbn, temp->GetIsbn().data()) < 0) {
             if (!flag) {
               cout << "\n";
@@ -200,10 +201,9 @@ public:
     }
   }
 
-  void name_show(char name[name_len + 1]) {
+  void NameShow(char name[name_len + 1]) {
     bool flag = false;
     if (book_system.total == 0) {
-      // 在链表头存入
       cout << "\n";
       return;
     }
@@ -211,7 +211,7 @@ public:
     auto temp = new Book;
     while (cur != nullptr) {
       for (int i = 0; i < cur->size; i++) {
-        book_system.Read(*temp, i);
+        book_system.Read(*temp, cur->index[i]);
         if (strcmp(name, temp->GetName().data()) == 0) {
           // 相同书名
           flag = true;
@@ -227,10 +227,9 @@ public:
       cout << "\n";
   }
 
-  void author_show(char author[name_len + 1]) {
+  void AuthorShow(char author[name_len + 1]) {
     bool flag = false;
     if (book_system.total == 0) {
-      // 在链表头存入
       cout << "\n";
       return;
     }
@@ -238,7 +237,7 @@ public:
     auto temp = new Book;
     while (cur != nullptr) {
       for (int i = 0; i < cur->size; i++) {
-        book_system.Read(*temp, i);
+        book_system.Read(*temp, cur->index[i]);
         if (strcmp(author, temp->GetAuthor().data()) == 0) {
           // 相同作者
           flag = true;
@@ -254,7 +253,7 @@ public:
       cout << "\n";
   }
 
-  void keyword_show(const string &s) {
+  void KeywordShow(const string &s) {
     bool flag = false;
     if (book_system.total == 0) {
       // 在链表头存入
@@ -265,7 +264,7 @@ public:
     auto temp = new Book;
     while (cur != nullptr) {
       for (int i = 0; i < cur->size; i++) {
-        book_system.Read(*temp, i);
+        book_system.Read(*temp, cur->index[i]);
         if (temp->KeywordJudge(s)) {
           // 是关键字
           flag = true;
@@ -279,6 +278,81 @@ public:
     }
     if (!flag)
       cout << "\n";
+  }
+
+  bool Buy(char isbn[isbn_len + 1], const long long x) {
+    if (book_system.total == 0) {
+      return false;
+    }
+    Block *cur = &head;
+    while (cur != nullptr) {
+      if (strcmp(isbn, cur->max_isbn) > 0) {
+        cur = cur->next;
+      } else {
+        auto temp = new Book;
+        for (int i = 0; i < cur->size; i++) {
+          book_system.Read(*temp, cur->index[i]);
+          if (strcmp(isbn, temp->GetIsbn().data()) < 0) {
+            // 当前位置的ISBN大于目标isbn
+            delete temp;
+            return false;
+          }
+          if (strcmp(isbn, temp->GetIsbn().data()) == 0) {
+            // 相同isbn
+            const bool flag = temp->ModifyQuantity(x);
+            book_system.Update(*temp, cur->index[i]);
+            delete temp;
+            return flag;
+          }
+        }
+        delete temp;
+        return false;
+      }
+    }
+    return false;
+  }
+
+  bool Select(char isbn[isbn_len + 1]) {
+    if (book_system.total == 0) {
+      return false;
+    }
+    Block *cur = &head;
+    while (cur != nullptr) {
+      if (strcmp(isbn, cur->max_isbn) > 0) {
+        cur = cur->next;
+      } else {
+        auto temp = new Book;
+        for (int i = 0; i < cur->size; i++) {
+          book_system.Read(*temp, cur->index[i]);
+          if (strcmp(isbn, temp->GetIsbn().data()) < 0) {
+            // 当前位置的ISBN大于目标isbn
+            delete temp;
+            return false;
+          }
+          if (strcmp(isbn, temp->GetIsbn().data()) == 0) {
+            // 相同isbn
+            selected_book_idx = cur->index[i];
+            delete temp;
+            return true;
+          }
+        }
+        delete temp;
+        return false;
+      }
+    }
+    return false;
+  }
+
+  bool Import(long long x, double cost) {
+    if (selected_book_idx == 0) {
+      return false;
+    }
+    auto temp = new Book;
+    book_system.Read(*temp, selected_book_idx);
+    temp->ModifyQuantity(-x);
+    book_system.Read(*temp, selected_book_idx);
+    //TODO cost要写到日志系统
+    return true;
   }
 };
 

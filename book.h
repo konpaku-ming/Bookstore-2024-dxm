@@ -10,7 +10,6 @@ private:
       author[name_len + 1]{};
   long long quantity = 0; // 库存数量
   double price = 0;
-  double total_cost = 0;
 
 public:
   Book();
@@ -43,7 +42,7 @@ public:
 
   void ModifyPrice(double);
 
-  void ModifyQuantity(long long);
+  bool ModifyQuantity(long long);
 
   bool operator>(const Book &a, const Book &b) const {
     return strcmp(a.isbn, b.isbn) > 0;
