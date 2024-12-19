@@ -74,5 +74,6 @@ string Account::GetName() const { return name; }
 int Account::GetPrivilege() const { return privilege; }
 
 void Account::ModifyPassword(char new_password[password_len + 1]) {
-  strcpy(this->password, new_password);
+  memset(password, 0, sizeof(password));
+  strcpy(password, new_password);
 }

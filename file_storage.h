@@ -346,7 +346,7 @@ public:
     auto temp = new Book;
     book_system.Read(*temp, selected_book_idx);
     temp->ModifyQuantity(-x);
-    book_system.Read(*temp, selected_book_idx);
+    book_system.Update(*temp, selected_book_idx);
     //TODO cost要写到日志系统
     return true;
   }

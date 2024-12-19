@@ -3,7 +3,7 @@
 #include "book.h"
 #include "file_storage.h"
 #include "log_storage.h"
-
+#include <algorithm>
 #include <cassert>
 #include <stack>
 #include <vector>
@@ -11,7 +11,7 @@
 BookDatabase MyBook;
 AccountDatabase MyUser;
 FinanceDatabase MyFinance("finance_log");
-std::stack<string> user_stack;
+std::vector<string> user_stack;
 using std::cin;
 using std::vector;
 
@@ -70,7 +70,7 @@ int main() {
       case 2: {
         strcpy(id, list[1].data());
         if (MyUser.Login(id, ""))
-          user_stack.push(id);
+          user_stack.push_back(list[1]);
         else
           cout << "Invalid\n";
         break;
@@ -79,7 +79,7 @@ int main() {
         strcpy(id, list[1].data());
         strcpy(password, list[2].data());
         if (MyUser.Login(id, password))
-          user_stack.push(id);
+          user_stack.push_back(list[1]);
         else
           cout << "Invalid\n";
         break;
@@ -87,21 +87,31 @@ int main() {
       default:
         cout << "Invalid\n";
       }
-      cout << user_stack.top() << "\n"; // TODO delete this
+      if (user_stack.empty()) {
+        cout << "no login"
+             << "\n"; // TODO delete this
+        continue;
+      }
+      cout << user_stack.back() << "\n"; // TODO delete this
     } else if (list[0] == "logout") {
       if (list.size() != 1 || MyUser.cur_privilege < 1)
         cout << "Invalid\n";
       else {
-        user_stack.pop();
+        user_stack.pop_back();
         if (user_stack.empty()) {
           MyUser.cur_privilege = 0;
           MyUser.cur_idx = 0;
         } else {
           char id[id_len + 1];
-          strcpy(id, user_stack.top().c_str());
+          strcpy(id, user_stack.back().c_str());
           MyUser.EnforcingLogin(id);
         }
-        cout << user_stack.top() << "\n"; // TODO delete this
+        if (user_stack.empty()) {
+          cout << "no login"
+               << "\n"; // TODO delete this
+          continue;
+        }
+        cout << user_stack.back() << "\n"; // TODO delete this
       }
     } else if (list[0] == "register") {
       if (list.size() != 4) {
@@ -163,6 +173,11 @@ int main() {
         cout << "Invalid\n";
       }
     } else if (list[0] == "delete") {
+      if (find(user_stack.begin(), user_stack.end(), list[1]) !=
+          user_stack.end()) {
+        cout << "Invalid\n";
+        continue;
+      }
       char id_[id_len + 1]{};
       strcpy(id_, list[1].c_str());
       if (list.size() != 2) {

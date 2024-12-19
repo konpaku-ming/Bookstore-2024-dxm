@@ -111,12 +111,8 @@ public:
     for (int i = 0; i < account_system.total; i++) {
       account_system.Read(*cur, idx[i]);
       if (strcmp(cur->GetId().data(), id) == 0) {
-        if (cur_privilege > cur->GetPrivilege()) {
-          cur_privilege = cur->GetPrivilege();
-          cur_idx = idx[i];
-          delete cur;
-          return;
-        }
+        cur_privilege = cur->GetPrivilege();
+        cur_idx = idx[i];
         delete cur;
         return;
       }
@@ -154,11 +150,13 @@ public:
       if (strcmp(cur->GetId().data(), id) == 0) {
         if (cur_privilege == 7 && password == "") {
           cur->ModifyPassword(new_password);
+          account_system.Update(*cur, idx[i]);
           delete cur;
           return true;
         }
         if (strcmp(password, cur->GetPassword().data()) == 0) {
           cur->ModifyPassword(new_password);
+          account_system.Update(*cur, idx[i]);
           delete cur;
           return true;
         }
