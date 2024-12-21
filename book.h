@@ -52,4 +52,16 @@ public:
 
   bool KeywordJudge(const string &) const;
 };
+
+bool IsIsbn(const string &s);
+
+bool IsName(const string &s);
+
+bool IsAuthor(const string &s);
+
+bool IsKeyword(const string &s);
+
+bool IsQuantity(long long x);
+
+bool IsTotalCost(double x);
 #endif // BOOK_H

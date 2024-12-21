@@ -31,6 +31,17 @@ void SpiltString(const string &str, vector<string> &list, char c = ' ') {
 }
 // 用于分割命令参数
 
+bool SpiltString(const string &str, std::pair<string, string> &p,
+                 char c = '=') {
+  string::size_type pos = str.find(c);
+  if (pos == string::npos) {
+    return false;
+  }
+  string s1 = str.substr(0, pos), s2 = str.substr(pos + 1);
+  p = std::make_pair(s1, s2);
+  return true;
+}
+
 int StringToInt(const string &str) {
   int num = 0;
   bool negative = false;
@@ -190,6 +201,115 @@ int main() {
       if (!MyUser.Delete(id_)) {
         cout << "Invalid\n";
       }
+    } else if (list[0] == "show") { // 这里注意可能有两种命令
+      if (list.size() > 1 && list[1] == "finance") {
+        // TODO:收支
+      } else {
+        if (MyUser.cur_privilege < 1) {
+          cout << "Invalid\n";
+          continue;
+        }
+        switch (list.size()) {
+        case 1: {
+          MyBook.AllShow();
+          break;
+        }
+        case 2: {
+          std::pair<string, string> p;
+          if (!SpiltString(list[1], p)) {
+            cout << "Invalid\n";
+            break;
+          }
+          string &s = p.second;
+          if (p.first == "-ISBN") {
+            if (!IsIsbn(s)) {
+              cout << "Invalid\n";
+            } else {
+              char isbn[isbn_len + 1]{};
+              strcpy(isbn, s.data());
+              MyBook.IsbnShow(isbn);
+            }
+          } else if (p.first == "-name") {
+            if (s.length() <= 2 || s.front() != '\"' || s.back() != '\"') {
+              cout << "Invalid\n";
+              break;
+            }
+            s = s.substr(1, s.length() - 2);
+            if (!IsName(s)) {
+              cout << "Invalid\n";
+              break;
+            }
+            char name[name_len + 1]{};
+            strcpy(name, s.data());
+            MyBook.NameShow(name);
+          } else if (p.first == "-author") {
+            if (s.length() <= 2 || s.front() != '\"' || s.back() != '\"') {
+              cout << "Invalid\n";
+              break;
+            }
+            s = s.substr(1, s.length() - 2);
+            if (!IsAuthor(s)) {
+              cout << "Invalid\n";
+              break;
+            }
+            char author[name_len + 1]{};
+            strcpy(author, s.data());
+            MyBook.AuthorShow(author);
+          } else if (p.first == "-keyword") {
+            if (s.length() <= 2 || s.front() != '\"' || s.back() != '\"') {
+              cout << "Invalid\n";
+              break;
+            }
+            s = s.substr(1, s.length() - 2);
+            if (!IsKeyword(s)) {
+              cout << "Invalid\n";
+              break;
+            }
+            MyBook.KeywordShow(s);
+          } else {
+            cout << "Invalid\n";
+          }
+          break;
+        }
+        default:
+          cout << "Invalid\n";
+        }
+      }
+    } else if (list[0] == "buy") {
+      if (MyUser.cur_privilege < 1 || list.size() != 3) {
+        cout << "Invalid\n";
+        continue;
+      }
+      const int quantity = StringToInt(list[2]);
+      if (IsIsbn(list[1]) && IsQuantity(quantity)) {
+        char isbn[isbn_len + 1]{};
+        strcpy(isbn, list[1].data());
+        const double income = MyBook.Buy(isbn, quantity);
+        if (income == -1) {
+          cout << "Invalid\n";
+        } else {
+          cout << std::fixed << std::setprecision(2) << income << '\n';
+          // TODO：计入收支
+        }
+      } else {
+        cout << "Invalid\n";
+      }
+    } else if (list[0] == "select") {
+      if (MyUser.cur_privilege < 3 || list.size() != 2) {
+        cout << "Invalid\n";
+        continue;
+      }
+      if (IsIsbn(list[1])) {
+        char isbn[isbn_len + 1];
+        strcpy(isbn, list[1].data());
+        if (!MyBook.Select(isbn))
+          cout << "Invalid\n";
+      } else {
+        cout << "Invalid\n";
+      }
+    } else if (list[0] == "modify") {
+
+
     }
   }
   return 0;

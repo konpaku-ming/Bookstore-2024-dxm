@@ -204,6 +204,26 @@ public:
     }
   }
 
+  void AllShow() {
+    if (book_system.total == 0) {
+      cout << "\n";
+      return;
+    }
+    Block *cur = &head;
+    auto temp = new Book;
+    while (cur != nullptr) {
+      for (int i = 0; i < cur->size; i++) {
+        book_system.Read(*temp, cur->index[i]);
+        cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
+             << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
+             << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
+             << temp->GetQuantity() << "\n";
+      }
+      cur = cur->next;
+    }
+    delete temp;
+  }
+
   void IsbnShow(char isbn[isbn_len + 1]) {
     bool flag = false;
     if (book_system.total == 0) {
@@ -322,9 +342,9 @@ public:
       cout << "\n";
   }
 
-  bool Buy(char isbn[isbn_len + 1], const long long x) {
+  double Buy(char isbn[isbn_len + 1], const long long x) {
     if (book_system.total == 0) {
-      return false;
+      return -1;
     }
     Block *cur = &head;
     while (cur != nullptr) {
@@ -337,18 +357,21 @@ public:
           if (strcmp(isbn, temp->GetIsbn().data()) < 0) {
             // 当前位置的ISBN大于目标isbn
             delete temp;
-            return false;
+            return -1;
           }
           if (strcmp(isbn, temp->GetIsbn().data()) == 0) {
             // 相同isbn
             const bool flag = temp->ModifyQuantity(x);
             book_system.Update(*temp, cur->index[i]);
             delete temp;
-            return flag;
+            if (flag) {
+              return temp->GetPrice() * x;
+            }
+            return -1;
           }
         }
         delete temp;
-        return false;
+        return -1;
       }
     }
     return false;
