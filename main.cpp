@@ -5,7 +5,6 @@
 #include "log_storage.h"
 #include <algorithm>
 #include <cassert>
-#include <stack>
 #include <vector>
 
 BookDatabase MyBook;
@@ -49,6 +48,7 @@ int StringToInt(const string &str) {
 int main() {
   MyBook.Init();
   MyUser.Init();
+  MyUser.Restore();
   MyFinance.initialise();
   string cmd;
   std::vector<string> list;
@@ -61,6 +61,7 @@ int main() {
       if (list.size() > 1) {
         cout << "Invalid\n";
       } else {
+        MyUser.Save();
         exit(0);
       }
     } else if (list[0] == "su") {

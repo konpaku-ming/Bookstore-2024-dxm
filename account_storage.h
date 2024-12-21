@@ -8,8 +8,10 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
+#include <unordered_map>
 #include <vector>
 class AccountDatabase;
+using std::unordered_map;
 
 // 图书的总数据库
 class AccountManage {
@@ -62,11 +64,19 @@ public:
   }
 };
 
+struct HashPair {
+  char id[id_len + 1];
+  int value;
+};
+
 class AccountDatabase {
 private:
   AccountManage account_system;
-  std::vector<int> idx = {1};
+  std::fstream back_up;
+  unordered_map<string, int> hash_map;
+  // std::vector<int> idx = {1};
   int cnt = 1;
+  int total = 1;
 
 public:
   int cur_privilege = 0;
@@ -81,6 +91,75 @@ public:
     account_system.initialize("accountsystem");
   }
 
+  void Restore() {
+    // 把一部分外存信息写回内存
+    if (access("backup", F_OK) != 0) {
+      // 检查文件是否存在
+      back_up.open("backup", std::ios::out);
+      back_up.close();
+      hash_map["root"] = cnt;
+      return;
+    }
+    back_up.open("backup", std::ios::in | std::ios::out);
+    back_up.seekg(0);
+    back_up.read(reinterpret_cast<char *>(&cnt), sizeof(int));
+    back_up.seekg(sizeof(int));
+    back_up.read(reinterpret_cast<char *>(&total), sizeof(int));
+    HashPair temp{};
+    for (int i = 0; i < total; i++) {
+      back_up.seekg(2 * sizeof(int) + i * sizeof(HashPair));
+      back_up.read(reinterpret_cast<char *>(&temp), sizeof(HashPair));
+      hash_map[temp.id] = temp.value;
+    }
+    back_up.close();
+  }
+
+  void Save() {
+    // 把内存信息转到文件里
+    total = hash_map.size();
+    back_up.open("backup", std::ios::in | std::ios::out);
+    back_up.seekp(0);
+    back_up.write(reinterpret_cast<char *>(&cnt), sizeof(int));
+    back_up.seekp(sizeof(int));
+    back_up.write(reinterpret_cast<char *>(&total), sizeof(int));
+    HashPair temp{};
+    int i = 0;
+    for (const auto &it : hash_map) {
+      strcpy(temp.id, it.first.c_str());
+      temp.value = it.second;
+      back_up.seekp(2 * sizeof(int) + i * sizeof(HashPair));
+      back_up.write(reinterpret_cast<char *>(&temp), sizeof(HashPair));
+      i++;
+    }
+    back_up.close();
+    hash_map.clear();
+  }
+
+  bool Login(const char id[id_len + 1],
+             const char password_[password_len + 1]) {
+    if (hash_map.find(id) == hash_map.end()) {
+      return false;
+    }
+    int number = hash_map[id];
+    auto cur = new Account;
+    account_system.Read(*cur, number);
+    if (cur_privilege > cur->GetPrivilege() && password_ == "") {
+      cur_privilege = cur->GetPrivilege();
+      cur_idx = number;
+      delete cur;
+      return true;
+    }
+    if (strcmp(password_, cur->GetPassword().data()) == 0) {
+      cur_privilege = cur->GetPrivilege();
+      cur_idx = number;
+      delete cur;
+      return true;
+    }
+    delete cur;
+    return false;
+  }
+
+  /*
   bool Login(char id[id_len + 1], const char password_[password_len + 1]) {
     auto cur = new Account;
     for (int i = 0; i < account_system.total; i++) {
@@ -105,7 +184,18 @@ public:
     delete cur;
     return false;
   }
+  */
 
+  void EnforcingLogin(const char id[id_len + 1]) {
+    int number = hash_map[id];
+    auto cur = new Account;
+    account_system.Read(*cur, number);
+    cur_privilege = cur->GetPrivilege();
+    cur_idx = number;
+    delete cur;
+  }
+
+  /*
   void EnforcingLogin(char id[id_len + 1]) {
     auto cur = new Account;
     for (int i = 0; i < account_system.total; i++) {
@@ -119,50 +209,44 @@ public:
     }
     delete cur;
   }
+  */
 
   bool Signup(Account &x) {
     char x_id[id_len + 1];
     strcpy(x_id, x.GetId().data());
-    auto cur = new Account;
-    for (int i = 0; i < account_system.total; i++) {
-      account_system.Read(*cur, idx[i]);
-      if (strcmp(cur->GetId().data(), x_id) == 0) {
-        delete cur;
-        return false;
-      }
+    if (hash_map.find(x_id) != hash_map.end()) {
+      return false;
     }
     cnt++;
     account_system.total++;
     account_system.Update(x, cnt);
-    idx.push_back(cnt);
-    delete cur;
+    hash_map[x_id] = cnt;
     return true;
   }
 
-  bool ChangePassword(char id[id_len + 1],
+  bool ChangePassword(const char id[id_len + 1],
                       const char password[password_len + 1],
                       char new_password[password_len + 1]) {
-    if (cur_privilege < 1)
+    if (cur_privilege < 1) {
       return false;
+    }
+    if (hash_map.find(id) == hash_map.end()) {
+      return false;
+    }
+    int number = hash_map[id];
     auto cur = new Account;
-    for (int i = 0; i < account_system.total; i++) {
-      account_system.Read(*cur, idx[i]);
-      if (strcmp(cur->GetId().data(), id) == 0) {
-        if (cur_privilege == 7 && password == "") {
-          cur->ModifyPassword(new_password);
-          account_system.Update(*cur, idx[i]);
-          delete cur;
-          return true;
-        }
-        if (strcmp(password, cur->GetPassword().data()) == 0) {
-          cur->ModifyPassword(new_password);
-          account_system.Update(*cur, idx[i]);
-          delete cur;
-          return true;
-        }
-        delete cur;
-        return false;
-      }
+    account_system.Read(*cur, number);
+    if (cur_privilege == 7 && password == "") {
+      cur->ModifyPassword(new_password);
+      account_system.Update(*cur, number);
+      delete cur;
+      return true;
+    }
+    if (strcmp(password, cur->GetPassword().data()) == 0) {
+      cur->ModifyPassword(new_password);
+      account_system.Update(*cur, number);
+      delete cur;
+      return true;
     }
     delete cur;
     return false;
@@ -175,37 +259,25 @@ public:
       return false;
     char x_id[id_len + 1];
     strcpy(x_id, x.GetId().data());
-    auto cur = new Account;
-    for (int i = 0; i < account_system.total; i++) {
-      account_system.Read(*cur, idx[i]);
-      if (strcmp(cur->GetId().data(), x_id) == 0) {
-        delete cur;
-        return false;
-      }
+    if (hash_map.find(x_id) != hash_map.end()) {
+      return false;
     }
     cnt++;
     account_system.total++;
     account_system.Update(x, cnt);
-    idx.push_back(cnt);
-    delete cur;
+    hash_map[x_id] = cnt;
     return true;
   }
 
-  bool Delete(char id[id_len + 1]) {
+  bool Delete(const char id[id_len + 1]) {
     if (cur_privilege < 7)
       return false;
-    auto cur = new Account;
-    for (auto it = idx.begin(); it != idx.end(); ++it) {
-      account_system.Read(*cur, *it);
-      if (strcmp(cur->GetId().data(), id) == 0) {
-        idx.erase(it);
-        account_system.total--;
-        delete cur;
-        return true;
-      }
+    auto it = hash_map.find(id);
+    if (it == hash_map.end()) {
+      return false;
     }
-    delete cur;
-    return false;
+    hash_map.erase(it);
+    return true;
   }
 };
 
