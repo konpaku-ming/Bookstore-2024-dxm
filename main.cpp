@@ -47,6 +47,7 @@ int StringToInt(const string &str) {
 
 int main() {
   MyBook.Init();
+  MyBook.Restore();
   MyUser.Init();
   MyUser.Restore();
   MyFinance.initialise();
@@ -62,6 +63,7 @@ int main() {
         cout << "Invalid\n";
       } else {
         MyUser.Save();
+        MyBook.Save();
         exit(0);
       }
     } else if (list[0] == "su") {

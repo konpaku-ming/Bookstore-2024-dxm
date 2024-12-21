@@ -74,6 +74,8 @@ private:
   BookManage book_system;
   Block head;
   int selected_book_idx = 0;
+  int block_number = 0;
+  std::fstream linked_block;
 
 public:
   BookDatabase() = default;
@@ -83,6 +85,48 @@ public:
   void Init() {
     // 初始化，给文件一个名字
     book_system.initialize("booksystem");
+  }
+
+  void Restore() {
+    // 把一部分外存信息写回内存
+    if (access("block", F_OK) != 0) {
+      // 检查文件是否存在
+      linked_block.open("block", std::ios::out);
+      linked_block.close();
+      return;
+    }
+    linked_block.open("block", std::ios::in | std::ios::out);
+    linked_block.seekg(0);
+    linked_block.read(reinterpret_cast<char *>(&block_number), sizeof(int));
+    linked_block.seekg(sizeof(int));
+    linked_block.read(reinterpret_cast<char *>(&head), sizeof(Block));
+    auto now = &head;
+    for (int i = 1; i < block_number; i++) {
+      linked_block.seekg(sizeof(int) + i * sizeof(Block));
+      now->next = new Block;
+      now = now->next;
+      linked_block.read(reinterpret_cast<char *>(now), sizeof(Block));
+    }
+    linked_block.close();
+  }
+
+  void Save() {
+    // 把内存信息转到文件里
+    linked_block.open("block", std::ios::in | std::ios::out);
+    linked_block.seekp(0);
+    linked_block.write(reinterpret_cast<char *>(&block_number), sizeof(int));
+    linked_block.seekp(sizeof(int));
+    linked_block.write(reinterpret_cast<char *>(&head), sizeof(Block));
+    Block *now = head.next;
+    int num = 1;
+    while (now != nullptr) {
+      auto it = now;
+      linked_block.seekp(sizeof(int) + num * sizeof(Block));
+      linked_block.write(reinterpret_cast<char *>(now), sizeof(Block));
+      now = now->next;
+      delete it;
+    }
+    linked_block.close();
   }
 
   void Insert(Book &x) {
@@ -117,6 +161,7 @@ public:
           cur->size++;
           cur->index[i] = book_system.Push(x);
           if (cur->size > max_size) {
+            block_number++;
             auto new_block = new Block;
             new_block->next = cur->next;
             cur->next = new_block;
@@ -138,6 +183,7 @@ public:
         cur->index[cur->size] = book_system.Push(x);
         cur->size++;
         if (cur->size > max_size) {
+          block_number++;
           auto new_block = new Block;
           new_block->next = cur->next;
           cur->next = new_block;

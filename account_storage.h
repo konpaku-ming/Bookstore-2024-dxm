@@ -159,33 +159,6 @@ public:
     return false;
   }
 
-  /*
-  bool Login(char id[id_len + 1], const char password_[password_len + 1]) {
-    auto cur = new Account;
-    for (int i = 0; i < account_system.total; i++) {
-      account_system.Read(*cur, idx[i]);
-      if (strcmp(cur->GetId().data(), id) == 0) {
-        if (cur_privilege > cur->GetPrivilege() && password_ == "") {
-          cur_privilege = cur->GetPrivilege();
-          cur_idx = idx[i];
-          delete cur;
-          return true;
-        }
-        if (strcmp(password_, cur->GetPassword().data()) == 0) {
-          cur_privilege = cur->GetPrivilege();
-          cur_idx = idx[i];
-          delete cur;
-          return true;
-        }
-        delete cur;
-        return false;
-      }
-    }
-    delete cur;
-    return false;
-  }
-  */
-
   void EnforcingLogin(const char id[id_len + 1]) {
     int number = hash_map[id];
     auto cur = new Account;
@@ -194,22 +167,6 @@ public:
     cur_idx = number;
     delete cur;
   }
-
-  /*
-  void EnforcingLogin(char id[id_len + 1]) {
-    auto cur = new Account;
-    for (int i = 0; i < account_system.total; i++) {
-      account_system.Read(*cur, idx[i]);
-      if (strcmp(cur->GetId().data(), id) == 0) {
-        cur_privilege = cur->GetPrivilege();
-        cur_idx = idx[i];
-        delete cur;
-        return;
-      }
-    }
-    delete cur;
-  }
-  */
 
   bool Signup(Account &x) {
     char x_id[id_len + 1];
