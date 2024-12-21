@@ -65,6 +65,14 @@ bool IsTotalCost(const double x) {
   return true;
 }
 
+bool IsPrice(const double x) {
+  // 检查是否为合法的price
+  if (x <= 0) {
+    return false;
+  }
+  return true;
+}
+
 Book::Book() = default;
 
 Book::Book(const string &isbn_, const string &keyword_, const string &name_,

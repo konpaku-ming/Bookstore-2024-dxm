@@ -5,6 +5,7 @@
 #include "log_storage.h"
 #include <algorithm>
 #include <cassert>
+#include <valarray>
 #include <vector>
 
 BookDatabase MyBook;
@@ -53,7 +54,36 @@ int StringToInt(const string &str) {
   for (; i < str.length(); i++) {
     num = num * 10 + (str[i] - '0');
   }
-  return negative ? -num : num;
+  if (negative) {
+    num = -num;
+  }
+  return num;
+}
+
+double StringToDouble(const string &str) {
+  double num = 0;
+  bool negative = false;
+  int i = 0, pos = -1;
+  if (str[0] == '-') {
+    negative = true;
+    i++;
+  }
+  for (; i < str.length(); i++) {
+    if (str[i] == '.') {
+      pos = i;
+      continue;
+    }
+    num = num * 10 + (str[i] - '0');
+  }
+  if (pos != -1) {
+    for (int k = pos + 1; k < str.length(); k++) {
+      num /= 10;
+    }
+  }
+  if (negative) {
+    num = -num;
+  }
+  return num;
 }
 
 int main() {
@@ -308,7 +338,121 @@ int main() {
         cout << "Invalid\n";
       }
     } else if (list[0] == "modify") {
-
+      bool isvalid = true;
+      bool is_isbn = false, is_name = false, is_author = false,
+           is_keyword = false, is_price = false;
+      if (MyUser.cur_privilege < 3 || list.size() == 1 || list.size() > 6 ||
+          MyBook.selected_book_idx == 0) {
+        cout << "Invalid\n";
+        continue;
+      }
+      std::pair<string, string> p[list.size()];
+      for (int i = 1; i < list.size(); i++) {
+        if (!SpiltString(list[i], p[i])) {
+          if (isvalid) {
+            cout << "Invalid\n";
+            isvalid = false;
+          }
+        }
+        if (p[i].first == "-ISBN") {
+          if (is_isbn || !IsIsbn(p[i].second)) {
+            if (isvalid) {
+              cout << "Invalid\n";
+              isvalid = false;
+            }
+          }
+          is_isbn = true;
+        }
+        if (p[i].first == "-name") {
+          if (p[i].second.length() < 2 || p[i].second.front() != '\"' ||
+              p[i].second.back() != '\"') {
+            if (isvalid) {
+              cout << "Invalid\n";
+              isvalid = false;
+            }
+          }
+          p[i].second = p[i].second.substr(1, p[i].second.length() - 2);
+          if (is_name || !IsName(p[i].second)) {
+            if (isvalid) {
+              cout << "Invalid\n";
+              isvalid = false;
+            }
+          }
+          is_name = true;
+        }
+        if (p[i].first == "-author") {
+          if (p[i].second.length() < 2 || p[i].second.front() != '\"' ||
+              p[i].second.back() != '\"') {
+            if (isvalid) {
+              cout << "Invalid\n";
+              isvalid = false;
+            }
+          }
+          p[i].second = p[i].second.substr(1, p[i].second.length() - 2);
+          if (is_author || !IsAuthor(p[i].second)) {
+            if (isvalid) {
+              cout << "Invalid\n";
+              isvalid = false;
+            }
+          }
+          is_author = true;
+        }
+        if (p[i].first == "-keyword") {
+          if (p[i].second.length() < 2 || p[i].second.front() != '\"' ||
+              p[i].second.back() != '\"') {
+            if (isvalid) {
+              cout << "Invalid\n";
+              isvalid = false;
+            }
+          }
+          p[i].second = p[i].second.substr(1, p[i].second.length() - 2);
+          if (is_keyword || !IsKeyword(p[i].second)) {
+            if (isvalid) {
+              cout << "Invalid\n";
+              isvalid = false;
+            }
+          }
+          is_keyword = true;
+        }
+        if (p[i].first == "-price") {
+          if (is_keyword || !IsPrice(StringToDouble(p[i].second))) {
+            if (isvalid) {
+              cout << "Invalid\n";
+              isvalid = false;
+            }
+          }
+          is_keyword = true;
+        }
+      }
+      if (!isvalid)
+        continue;
+      if (is_isbn) {
+        for (int i = 1; i < list.size(); i++) {
+          if (p[i].first == "-ISBN") {
+            if (!MyBook.IsbnModify(p[i].second)) {
+              cout << "Invalid\n";
+              isvalid = false;
+            }
+          }
+        }
+      }
+      if (!isvalid)
+        continue;
+      for (int i = 1; i < list.size(); i++) {
+        if (p[i].first == "-name") {
+          MyBook.NameModify(p[i].second);
+        }
+        if (p[i].first == "-author") {
+          MyBook.AuthorModify(p[i].second);
+        }
+        if (p[i].first == "-keyword") {
+          MyBook.KeywordModify(p[i].second);
+        }
+        if (p[i].first == "-price") {
+          MyBook.PriceModify(StringToDouble(p[i].second));
+        }
+      }
+    } else if (list[0] == "import") {
 
     }
   }

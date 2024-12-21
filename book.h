@@ -64,4 +64,6 @@ bool IsKeyword(const string &s);
 bool IsQuantity(long long x);
 
 bool IsTotalCost(double x);
+
+bool IsPrice(double x);
 #endif // BOOK_H

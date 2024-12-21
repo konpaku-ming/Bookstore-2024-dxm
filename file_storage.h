@@ -73,11 +73,12 @@ class BookDatabase {
 private:
   BookManage book_system;
   Block head;
-  int selected_book_idx = 0;
   int block_number = 0;
   std::fstream linked_block;
 
 public:
+  int selected_book_idx = 0;
+
   BookDatabase() = default;
 
   ~BookDatabase() = default;
@@ -416,8 +417,53 @@ public:
     book_system.Read(*temp, selected_book_idx);
     temp->ModifyQuantity(-x);
     book_system.Update(*temp, selected_book_idx);
-    //TODO cost要写到日志系统
+    // TODO cost要写到日志系统
     return true;
+  }
+
+  bool IsbnModify(const string &isbn) {
+    auto temp = new Book;
+    book_system.Read(*temp, selected_book_idx);
+    if (temp->GetIsbn() == isbn) {
+      delete temp;
+      return false;
+    }
+    temp->ModifyIsbn(isbn);
+    book_system.Update(*temp, selected_book_idx);
+    delete temp;
+    return true;
+  }
+
+  void NameModify(const string &name) {
+    auto temp = new Book;
+    book_system.Read(*temp, selected_book_idx);
+    temp->ModifyName(name);
+    book_system.Update(*temp, selected_book_idx);
+    delete temp;
+  }
+
+  void AuthorModify(const string &author) {
+    auto temp = new Book;
+    book_system.Read(*temp, selected_book_idx);
+    temp->ModifyAuthor(author);
+    book_system.Update(*temp, selected_book_idx);
+    delete temp;
+  }
+
+  void KeywordModify(const string &keyword) {
+    auto temp = new Book;
+    book_system.Read(*temp, selected_book_idx);
+    temp->ModifyKeyword(keyword);
+    book_system.Update(*temp, selected_book_idx);
+    delete temp;
+  }
+
+  void PriceModify(const double x) {
+    auto temp = new Book;
+    book_system.Read(*temp, selected_book_idx);
+    temp->ModifyPrice(x);
+    book_system.Update(*temp, selected_book_idx);
+    delete temp;
   }
 };
 
