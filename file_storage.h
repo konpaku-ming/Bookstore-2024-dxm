@@ -378,9 +378,10 @@ public:
     return false;
   }
 
-  bool Select(char isbn[isbn_len + 1]) {
+  void Select(char isbn[isbn_len + 1]) {
     if (book_system.total == 0) {
-      return false;
+      Book new_book = {isbn, "", "", "", 0, 0};
+      this->Insert(new_book);
     }
     Block *cur = &head;
     while (cur != nullptr) {
@@ -392,21 +393,26 @@ public:
           book_system.Read(*temp, cur->index[i]);
           if (strcmp(isbn, temp->GetIsbn().data()) < 0) {
             // 当前位置的ISBN大于目标isbn
+            Book new_book = {isbn, "", "", "", 0, 0};
+            this->Insert(new_book);
             delete temp;
-            return false;
+            return;
           }
           if (strcmp(isbn, temp->GetIsbn().data()) == 0) {
             // 相同isbn
             selected_book_idx = cur->index[i];
             delete temp;
-            return true;
+            return;
           }
         }
         delete temp;
-        return false;
+        Book new_book = {isbn, "", "", "", 0, 0};
+        this->Insert(new_book);
+        return;
       }
     }
-    return false;
+    Book new_book = {isbn, "", "", "", 0, 0};
+    this->Insert(new_book);
   }
 
   bool Import(const long long x, double cost) {

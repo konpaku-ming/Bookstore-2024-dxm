@@ -349,8 +349,7 @@ int main() {
       if (IsIsbn(list[1])) {
         char isbn[isbn_len + 1];
         strcpy(isbn, list[1].data());
-        if (!MyBook.Select(isbn))
-          cout << "Invalid\n";
+        MyBook.Select(isbn);
       } else {
         cout << "Invalid\n";
       }

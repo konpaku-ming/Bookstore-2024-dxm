@@ -52,7 +52,7 @@ public:
   }
 
   bool FinanceReport(const int count) {
-    if (count > info_len)
+    if (count > info_len || count < 0)
       return false;
     if (count == 0) {
       cout << "\n";
