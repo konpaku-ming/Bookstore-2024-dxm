@@ -43,8 +43,8 @@ bool SpiltString(const string &str, std::pair<string, string> &p,
   return true;
 }
 
-int StringToInt(const string &str) {
-  int num = 0;
+long long StringToInt(const string &str) {
+  long long num = 0;
   bool negative = false;
   int i = 0;
   if (str[0] == '-') {
@@ -91,7 +91,8 @@ int main() {
   MyBook.Restore();
   MyUser.Init();
   MyUser.Restore();
-  MyFinance.initialise();
+  MyFinance.Init();
+  MyFinance.Restore();
   string cmd;
   std::vector<string> list;
   while (true) {
@@ -233,7 +234,23 @@ int main() {
       }
     } else if (list[0] == "show") { // 这里注意可能有两种命令
       if (list.size() > 1 && list[1] == "finance") {
-        // TODO:收支
+        if (MyUser.cur_privilege < 7) {
+          cout << "Invalid\n";
+          continue;
+        }
+        switch (list.size()) {
+        case 2: {
+          MyFinance.FinanceReport(MyFinance.info_len);
+          break;
+        }
+        case 3: {
+          const int count = StringToInt(list[2]);
+          MyFinance.FinanceReport(count);
+          break;
+        }
+        default:
+          cout << "Invalid\n";
+        }
       } else {
         if (MyUser.cur_privilege < 1) {
           cout << "Invalid\n";
@@ -310,7 +327,7 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
-      const int quantity = StringToInt(list[2]);
+      const long long quantity = StringToInt(list[2]);
       if (IsIsbn(list[1]) && IsQuantity(quantity)) {
         char isbn[isbn_len + 1]{};
         strcpy(isbn, list[1].data());
@@ -319,7 +336,7 @@ int main() {
           cout << "Invalid\n";
         } else {
           cout << std::fixed << std::setprecision(2) << income << '\n';
-          // TODO：计入收支
+          MyFinance.Write(income);
         }
       } else {
         cout << "Invalid\n";
@@ -338,14 +355,14 @@ int main() {
         cout << "Invalid\n";
       }
     } else if (list[0] == "modify") {
-      bool isvalid = true;
-      bool is_isbn = false, is_name = false, is_author = false,
-           is_keyword = false, is_price = false;
       if (MyUser.cur_privilege < 3 || list.size() == 1 || list.size() > 6 ||
           MyBook.selected_book_idx == 0) {
         cout << "Invalid\n";
         continue;
       }
+      bool isvalid = true;
+      bool is_isbn = false, is_name = false, is_author = false,
+           is_keyword = false, is_price = false;
       std::pair<string, string> p[list.size()];
       for (int i = 1; i < list.size(); i++) {
         if (!SpiltString(list[i], p[i])) {
@@ -415,13 +432,13 @@ int main() {
           is_keyword = true;
         }
         if (p[i].first == "-price") {
-          if (is_keyword || !IsPrice(StringToDouble(p[i].second))) {
+          if (is_price || !IsPrice(StringToDouble(p[i].second))) {
             if (isvalid) {
               cout << "Invalid\n";
               isvalid = false;
             }
           }
-          is_keyword = true;
+          is_price = true;
         }
       }
       if (!isvalid)
@@ -453,7 +470,17 @@ int main() {
         }
       }
     } else if (list[0] == "import") {
-
+      if (MyUser.cur_privilege < 3 || list.size() != 3) {
+        cout << "Invalid\n";
+        continue;
+      }
+      const long long x = StringToInt(list[1]);
+      const double cost = StringToDouble(list[2]);
+      if (!MyBook.Import(x, cost)) {
+        cout << "Invalid\n";
+        continue;
+      }
+      MyFinance.Write(-cost);
     }
   }
   return 0;

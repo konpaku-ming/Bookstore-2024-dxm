@@ -18,6 +18,7 @@ public:
           int privilege_);
 
   ~Account();
+
   string GetPassword() const;
 
   string GetId() const;
