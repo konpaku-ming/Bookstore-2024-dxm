@@ -74,7 +74,6 @@ private:
   AccountManage account_system;
   std::fstream back_up;
   unordered_map<string, int> hash_map;
-  // std::vector<int> idx = {1};
   int cnt = 1;
   int total = 1;
 

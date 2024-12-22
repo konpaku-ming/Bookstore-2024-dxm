@@ -134,11 +134,11 @@ int main() {
         cout << "Invalid\n";
       }
       if (user_stack.empty()) {
-        cout << "no login"
-             << "\n"; // TODO delete this
+        // cout << "no login"
+        //      << "\n"; // TODO delete this
         continue;
       }
-      cout << user_stack.back() << "\n"; // TODO delete this
+      // cout << user_stack.back() << "\n"; // TODO delete this
     } else if (list[0] == "logout") {
       if (list.size() != 1 || MyUser.cur_privilege < 1)
         cout << "Invalid\n";
@@ -153,11 +153,11 @@ int main() {
           MyUser.EnforcingLogin(id);
         }
         if (user_stack.empty()) {
-          cout << "no login"
-               << "\n"; // TODO delete this
+          // cout << "no login"
+          //      << "\n"; // TODO delete this
           continue;
         }
-        cout << user_stack.back() << "\n"; // TODO delete this
+        // cout << user_stack.back() << "\n"; // TODO delete this
       }
     } else if (list[0] == "register") {
       if (list.size() != 4) {
@@ -481,6 +481,8 @@ int main() {
         continue;
       }
       MyFinance.Write(-cost);
+    } else {
+      cout << "Invalid\n";
     }
   }
   return 0;
