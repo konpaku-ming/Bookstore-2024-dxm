@@ -174,3 +174,5 @@ void SpiltKeyword(const string &str, std::vector<string> &list, char c) {
     list.push_back(string());
   }
 }
+
+bool cmp(const Book &a, const Book &b) { return a.GetIsbn() < b.GetIsbn(); }

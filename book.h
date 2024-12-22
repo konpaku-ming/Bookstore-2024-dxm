@@ -45,12 +45,6 @@ public:
 
   bool ModifyQuantity(long long);
 
-  bool operator>(const Book &x) const { return strcmp(isbn, x.isbn) > 0; }
-
-  bool operator<(const Book &x) const { return strcmp(isbn, x.isbn) < 0; }
-
-  bool operator==(const Book &x) const { return strcmp(isbn, x.isbn) == 0; }
-
   bool KeywordJudge(const string &) const;
 };
 
@@ -69,4 +63,6 @@ bool IsTotalCost(double x);
 bool IsPrice(double x);
 
 void SpiltKeyword(const string &str, std::vector<string> &list, char c = '|');
+
+bool cmp(const Book &a, const Book &b);
 #endif // BOOK_H

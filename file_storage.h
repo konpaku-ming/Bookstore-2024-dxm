@@ -144,6 +144,18 @@ public:
       cout << "\n";
       return;
     }
+    const int size_ = name_map[name].size();
+    Book temp[size_];
+    for (int i = 0; i < size_; i++) {
+      book_system.Read(temp[i], name_map[name][i]);
+    }
+    std::sort(temp, temp + size_, cmp);
+    for (int i = 0; i < size_; i++) {
+      cout << temp[i].GetIsbn() << "\t" << temp[i].GetName() << "\t"
+           << temp[i].GetAuthor() << "\t" << temp[i].GetKeyword() << "\t"
+           << std::fixed << std::setprecision(2) << temp[i].GetPrice() << "\t"
+           << temp[i].GetQuantity() << "\n";
+    }
   }
 
   void AuthorShow(const string &author) {
@@ -155,6 +167,18 @@ public:
       cout << "\n";
       return;
     }
+    const int size_ = author_map[author].size();
+    Book temp[size_];
+    for (int i = 0; i < size_; i++) {
+      book_system.Read(temp[i], author_map[author][i]);
+    }
+    std::sort(temp, temp + size_, cmp);
+    for (int i = 0; i < size_; i++) {
+      cout << temp[i].GetIsbn() << "\t" << temp[i].GetName() << "\t"
+           << temp[i].GetAuthor() << "\t" << temp[i].GetKeyword() << "\t"
+           << std::fixed << std::setprecision(2) << temp[i].GetPrice() << "\t"
+           << temp[i].GetQuantity() << "\n";
+    }
   }
 
   void KeywordShow(const string &keyword) {
@@ -165,6 +189,18 @@ public:
     if (author_map[keyword].empty()) {
       cout << "\n";
       return;
+    }
+    const int size_ = keyword_map[keyword].size();
+    Book temp[size_];
+    for (int i = 0; i < size_; i++) {
+      book_system.Read(temp[i], keyword_map[keyword][i]);
+    }
+    std::sort(temp, temp + size_, cmp);
+    for (int i = 0; i < size_; i++) {
+      cout << temp[i].GetIsbn() << "\t" << temp[i].GetName() << "\t"
+           << temp[i].GetAuthor() << "\t" << temp[i].GetKeyword() << "\t"
+           << std::fixed << std::setprecision(2) << temp[i].GetPrice() << "\t"
+           << temp[i].GetQuantity() << "\n";
     }
   }
 
