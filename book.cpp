@@ -153,7 +153,24 @@ bool Book::KeywordJudge(const string &s) const {
   for (int i = 0; i < s.length(); i++) {
     if (s[i] != str[r + i])
       break;
-    if (i == s.length() - 1)return true;
+    if (i == s.length() - 1)
+      return true;
   }
   return false;
+}
+
+void SpiltKeyword(const string &str, std::vector<string> &list, char c) {
+  list.clear();
+  if (c == ' ' && str.empty())
+    return;
+  string::size_type last_pos = 0, pos;
+  do {
+    pos = str.find(c, last_pos);
+    if (pos > last_pos || c != ' ')
+      list.push_back(str.substr(last_pos, pos - last_pos));
+    last_pos = pos + 1;
+  } while (last_pos < str.length() && pos != string::npos);
+  if (c != ' ' && str.back() == c) {
+    list.push_back(string());
+  }
 }

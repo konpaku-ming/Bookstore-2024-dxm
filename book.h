@@ -2,6 +2,7 @@
 #define BOOK_H
 #include <cstring>
 #include <string>
+#include <vector>
 using std::string;
 constexpr int isbn_len = 20, keyword_len = 60, name_len = 60;
 
@@ -66,4 +67,6 @@ bool IsQuantity(long long x);
 bool IsTotalCost(double x);
 
 bool IsPrice(double x);
+
+void SpiltKeyword(const string &str, std::vector<string> &list, char c = '|');
 #endif // BOOK_H

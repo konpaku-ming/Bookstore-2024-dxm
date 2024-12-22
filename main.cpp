@@ -5,6 +5,8 @@
 #include "log_storage.h"
 #include <algorithm>
 #include <cassert>
+#include <set>
+#include <unordered_set>
 #include <valarray>
 #include <vector>
 
@@ -15,7 +17,7 @@ std::vector<string> user_stack;
 using std::cin;
 using std::vector;
 
-void SpiltString(const string &str, vector<string> &list, char c = ' ') {
+void SpiltCommand(const string &str, vector<string> &list, char c = ' ') {
   list.clear();
   if (c == ' ' && str.empty())
     return;
@@ -97,7 +99,7 @@ int main() {
   std::vector<string> list;
   while (true) {
     getline(cin, cmd);
-    SpiltString(cmd, list);
+    SpiltCommand(cmd, list);
     if (list.empty())
       continue;
     if (list[0] == "quit" || list[0] == "exit") {
@@ -105,7 +107,6 @@ int main() {
         cout << "Invalid\n";
       } else {
         MyUser.Save();
-        MyBook.Save();
         MyFinance.Save();
         exit(0);
       }
@@ -273,9 +274,7 @@ int main() {
             if (!IsIsbn(s)) {
               cout << "Invalid\n";
             } else {
-              char isbn[isbn_len + 1]{};
-              strcpy(isbn, s.data());
-              MyBook.IsbnShow(isbn);
+              MyBook.IsbnShow(s);
             }
           } else if (p.first == "-name") {
             if (s.length() <= 2 || s.front() != '\"' || s.back() != '\"') {
@@ -287,9 +286,7 @@ int main() {
               cout << "Invalid\n";
               break;
             }
-            char name[name_len + 1]{};
-            strcpy(name, s.data());
-            MyBook.NameShow(name);
+            MyBook.NameShow(s);
           } else if (p.first == "-author") {
             if (s.length() <= 2 || s.front() != '\"' || s.back() != '\"') {
               cout << "Invalid\n";
@@ -366,77 +363,90 @@ int main() {
       std::pair<string, string> p[list.size()];
       for (int i = 1; i < list.size(); i++) {
         if (!SpiltString(list[i], p[i])) {
-          if (isvalid) {
-            cout << "Invalid\n";
-            isvalid = false;
-          }
+          cout << "Invalid\n";
+          isvalid = false;
+          break;
         }
         if (p[i].first == "-ISBN") {
           if (is_isbn || !IsIsbn(p[i].second)) {
-            if (isvalid) {
-              cout << "Invalid\n";
-              isvalid = false;
-            }
+            cout << "Invalid\n";
+            isvalid = false;
+            break;
           }
           is_isbn = true;
         }
         if (p[i].first == "-name") {
           if (p[i].second.length() < 2 || p[i].second.front() != '\"' ||
               p[i].second.back() != '\"') {
-            if (isvalid) {
-              cout << "Invalid\n";
-              isvalid = false;
-            }
+            cout << "Invalid\n";
+            isvalid = false;
+            break;
           }
           p[i].second = p[i].second.substr(1, p[i].second.length() - 2);
           if (is_name || !IsName(p[i].second)) {
-            if (isvalid) {
-              cout << "Invalid\n";
-              isvalid = false;
-            }
+            cout << "Invalid\n";
+            isvalid = false;
+            break;
           }
           is_name = true;
         }
         if (p[i].first == "-author") {
           if (p[i].second.length() < 2 || p[i].second.front() != '\"' ||
               p[i].second.back() != '\"') {
-            if (isvalid) {
-              cout << "Invalid\n";
-              isvalid = false;
-            }
+            cout << "Invalid\n";
+            isvalid = false;
+            break;
           }
           p[i].second = p[i].second.substr(1, p[i].second.length() - 2);
           if (is_author || !IsAuthor(p[i].second)) {
-            if (isvalid) {
-              cout << "Invalid\n";
-              isvalid = false;
-            }
+            cout << "Invalid\n";
+            isvalid = false;
+            break;
           }
           is_author = true;
         }
         if (p[i].first == "-keyword") {
           if (p[i].second.length() < 2 || p[i].second.front() != '\"' ||
               p[i].second.back() != '\"') {
-            if (isvalid) {
-              cout << "Invalid\n";
-              isvalid = false;
-            }
+            cout << "Invalid\n";
+            isvalid = false;
+            break;
           }
           p[i].second = p[i].second.substr(1, p[i].second.length() - 2);
-          if (is_keyword || !IsKeyword(p[i].second)) {
-            if (isvalid) {
-              cout << "Invalid\n";
-              isvalid = false;
-            }
+          if (is_keyword) {
+            cout << "Invalid\n";
+            isvalid = false;
+            break;
           }
           is_keyword = true;
+          std::vector<string> keywords;
+          SpiltKeyword(p[i].second, keywords);
+          std::unordered_set<string> copy;
+          for (const auto &word : keywords) {
+            if (!IsKeyword(word)) {
+              cout << "Invalid\n";
+              isvalid = false;
+              break;
+            }
+            copy.insert(word);
+          }
+          if (!isvalid)
+            break;
+          if (keywords.size() != copy.size()) {
+            cout << "Invalid\n";
+            isvalid = false;
+            break;
+          }
+        } else {
+          cout << "Invalid\n";
+          isvalid = false;
+          break;
         }
         if (p[i].first == "-price") {
           if (is_price || !IsPrice(StringToDouble(p[i].second))) {
-            if (isvalid) {
-              cout << "Invalid\n";
-              isvalid = false;
-            }
+            cout << "Invalid\n";
+            isvalid = false;
+            break;
           }
           is_price = true;
         }
@@ -449,6 +459,7 @@ int main() {
             if (!MyBook.IsbnModify(p[i].second)) {
               cout << "Invalid\n";
               isvalid = false;
+              break;
             }
           }
         }

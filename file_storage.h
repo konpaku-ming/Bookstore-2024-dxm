@@ -2,6 +2,7 @@
 #define FILE_STORAGE_H
 
 #include "book.h"
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <iomanip>
@@ -10,6 +11,7 @@
 #include <unistd.h>
 using std::cout;
 using std::string;
+using std::vector;
 constexpr int max_size = 500;
 class BookDatabase;
 
@@ -28,12 +30,11 @@ public:
   ~BookManage() { book_data.close(); }
 
   void initialize(string FN = "") {
-    /*
     if (access(file_name.c_str(), F_OK) == 0) {
       // 检查文件是否存在
+      book_data.read(reinterpret_cast<char *>(&total), sizeof(int));
       return;
     }
-    */
     if (FN != "") {
       file_name = FN;
     }
@@ -43,38 +44,32 @@ public:
   }
 
   void Read(Book &dest, const int n) {
-    book_data.seekg((n - 1) * sizeof(Book));
+    book_data.seekg((n - 1) * sizeof(Book) + sizeof(int));
     book_data.read(reinterpret_cast<char *>(&dest), sizeof(Book));
   }
 
   void Update(Book &new_book, const int n) {
     // 更新第n本书的信息
-    book_data.seekp((n - 1) * sizeof(Book));
+    book_data.seekp((n - 1) * sizeof(Book) + sizeof(int));
     book_data.write(reinterpret_cast<char *>(&new_book), sizeof(Book));
   }
 
   int Push(Book &new_book) {
     // 在尾部写入新书
     total++;
-    book_data.seekp((total - 1) * sizeof(Book));
+    book_data.seekp((total - 1) * sizeof(Book) + sizeof(int));
     book_data.write(reinterpret_cast<char *>(&new_book), sizeof(Book));
     return total;
   }
 };
 
-struct Block {
-  char max_isbn[isbn_len + 1]{};
-  int index[505]{};
-  int size = 0;
-  Block *next = nullptr;
-};
-
 class BookDatabase {
 private:
   BookManage book_system;
-  Block head;
-  int block_number = 0;
-  std::fstream linked_block;
+  unordered_map<string, int> isbn_map{};
+  unordered_map<string, vector<int>> name_map{};
+  unordered_map<string, vector<int>> author_map{};
+  unordered_map<string, vector<int>> keyword_map{};
 
 public:
   int selected_book_idx = 0;
@@ -90,116 +85,23 @@ public:
 
   void Restore() {
     // 把一部分外存信息写回内存
-    if (access("block", F_OK) != 0) {
+    if (access("all_book", F_OK) != 0) {
       // 检查文件是否存在
-      linked_block.open("block", std::ios::out);
-      linked_block.close();
       return;
     }
-    linked_block.open("block", std::ios::in | std::ios::out);
-    linked_block.seekg(0);
-    linked_block.read(reinterpret_cast<char *>(&block_number), sizeof(int));
-    linked_block.seekg(sizeof(int));
-    linked_block.read(reinterpret_cast<char *>(&head), sizeof(Block));
-    auto now = &head;
-    for (int i = 1; i < block_number; i++) {
-      linked_block.seekg(sizeof(int) + i * sizeof(Block));
-      now->next = new Block;
-      now = now->next;
-      linked_block.read(reinterpret_cast<char *>(now), sizeof(Block));
-    }
-    linked_block.close();
-  }
-
-  void Save() {
-    // 把内存信息转到文件里
-    linked_block.open("block", std::ios::in | std::ios::out);
-    linked_block.seekp(0);
-    linked_block.write(reinterpret_cast<char *>(&block_number), sizeof(int));
-    linked_block.seekp(sizeof(int));
-    linked_block.write(reinterpret_cast<char *>(&head), sizeof(Block));
-    Block *now = head.next;
-    int num = 1;
-    while (now != nullptr) {
-      auto it = now;
-      linked_block.seekp(sizeof(int) + num * sizeof(Block));
-      linked_block.write(reinterpret_cast<char *>(now), sizeof(Block));
-      now = now->next;
-      delete it;
-    }
-    linked_block.close();
-  }
-
-  int Insert(Book &x) {
-    if (book_system.total == 0) {
-      // 在链表头存入
-      head.index[head.size] = book_system.Push(x);
-      head.size++;
-      strcpy(head.max_isbn, x.GetIsbn().data());
-      return head.index[head.size - 1];
-    }
-    Block *cur = &head;
-    while (cur != nullptr) {
-      if (strcmp(x.GetIsbn().data(), cur->max_isbn) > 0 &&
-          cur->next != nullptr) {
-        cur = cur->next;
-      } else {
-        auto temp = new Book;
-        for (int i = 0; i < cur->size; i++) {
-          book_system.Read(*temp, cur->index[i]);
-          if (x > *temp) {
-            // 大于当前位置
-            continue;
-          }
-          for (int j = cur->size - 1; j >= i; j--) {
-            cur->index[j + 1] = cur->index[j];
-          }
-          cur->size++;
-          cur->index[i] = book_system.Push(x);
-          const int idx = cur->index[i];
-          if (cur->size > max_size) {
-            block_number++;
-            auto new_block = new Block;
-            new_block->next = cur->next;
-            cur->next = new_block;
-            int new_size = cur->size / 2;
-            strcpy(new_block->max_isbn, cur->max_isbn);
-            book_system.Read(*temp, cur->index[new_size - 1]);
-            strcpy(cur->max_isbn, temp->GetIsbn().data());
-            for (int k = new_size; k < cur->size; k++) {
-              new_block->index[new_block->size++] = cur->index[k];
-              cur->index[k] = 0;
-            }
-            cur->size = new_size;
-            new_block = nullptr;
-          }
-          delete temp;
-          return idx;
-        }
-        strcpy(cur->max_isbn, x.GetIsbn().data());
-        cur->index[cur->size] = book_system.Push(x);
-        const int idx = cur->index[cur->size];
-        cur->size++;
-        if (cur->size > max_size) {
-          block_number++;
-          auto new_block = new Block;
-          new_block->next = cur->next;
-          cur->next = new_block;
-          int new_size = cur->size / 2;
-          strcpy(new_block->max_isbn, cur->max_isbn);
-          book_system.Read(*temp, cur->index[new_size - 1]);
-          strcpy(cur->max_isbn, temp->GetIsbn().data());
-          for (int k = new_size; k < cur->size; k++) {
-            new_block->index[new_block->size++] = cur->index[k];
-            cur->index[k] = 0;
-          }
-          cur->size = new_size;
-          new_block = nullptr;
-        }
-        delete temp;
-        return idx;
+    auto now = new Book;
+    for (int i = 1; i <= book_system.total; i++) {
+      book_system.Read(*now, i);
+      isbn_map[now->GetIsbn()] = i;
+      name_map[now->GetName()].push_back(i);
+      author_map[now->GetAuthor()].push_back(i);
+      std::vector<string> keywords;
+      SpiltKeyword(now->GetKeyword(), keywords);
+      for (int j = 0; i < keywords.size(); j++) {
+        keyword_map[keywords[i]].push_back(i);
       }
     }
+    delete now;
   }
 
   void AllShow() {
@@ -207,209 +109,90 @@ public:
       cout << "\n";
       return;
     }
-    Block *cur = &head;
     auto temp = new Book;
-    while (cur != nullptr) {
-      for (int i = 0; i < cur->size; i++) {
-        book_system.Read(*temp, cur->index[i]);
-        cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
-             << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
-             << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
-             << temp->GetQuantity() << "\n";
-      }
-      cur = cur->next;
+    for (int i = 1; i <= book_system.total; i++) {
+      book_system.Read(*temp, i);
+      cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
+           << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
+           << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
+           << temp->GetQuantity() << "\n";
     }
     delete temp;
   }
 
-  void IsbnShow(char isbn[isbn_len + 1]) {
-    bool flag = false;
-    if (book_system.total == 0) {
+  void IsbnShow(const string &isbn) {
+    if (isbn_map.find(isbn) == isbn_map.end()) {
       cout << "\n";
       return;
     }
-    Block *cur = &head;
-    while (cur != nullptr) {
-      if (strcmp(isbn, cur->max_isbn) > 0 && cur->next != nullptr) {
-        cur = cur->next;
-      } else {
-        auto temp = new Book;
-        for (int i = 0; i < cur->size; i++) {
-          book_system.Read(*temp, cur->index[i]);
-          if (strcmp(isbn, temp->GetIsbn().data()) < 0) {
-            if (!flag) {
-              cout << "\n";
-            }
-            delete temp;
-            return;
-          }
-          if (strcmp(isbn, temp->GetIsbn().data()) == 0) {
-            flag = true;
-            // 相同isbn
-            cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
-                 << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
-                 << std::fixed << std::setprecision(2) << temp->GetPrice()
-                 << "\t" << temp->GetQuantity() << "\n";
-          }
-        }
-        if (!flag) {
-          cout << "\n";
-        }
-        delete temp;
-        return;
-      }
-    }
-  }
-
-  void NameShow(char name[name_len + 1]) {
-    bool flag = false;
-    if (book_system.total == 0) {
-      cout << "\n";
-      return;
-    }
-    Block *cur = &head;
+    const int idx = isbn_map[isbn];
     auto temp = new Book;
-    while (cur != nullptr) {
-      for (int i = 0; i < cur->size; i++) {
-        book_system.Read(*temp, cur->index[i]);
-        if (strcmp(name, temp->GetName().data()) == 0) {
-          // 相同书名
-          flag = true;
-          cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
-               << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
-               << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
-               << temp->GetQuantity() << "\n";
-        }
-      }
-      cur = cur->next;
-    }
-    if (!flag)
-      cout << "\n";
+    book_system.Read(*temp, idx);
+    cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
+         << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
+         << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
+         << temp->GetQuantity() << "\n";
+    delete temp;
   }
 
-  void AuthorShow(char author[name_len + 1]) {
-    bool flag = false;
-    if (book_system.total == 0) {
+  void NameShow(const string &name) {
+    if (name_map.find(name) == name_map.end()) {
       cout << "\n";
       return;
     }
-    Block *cur = &head;
-    auto temp = new Book;
-    while (cur != nullptr) {
-      for (int i = 0; i < cur->size; i++) {
-        book_system.Read(*temp, cur->index[i]);
-        if (strcmp(author, temp->GetAuthor().data()) == 0) {
-          // 相同作者
-          flag = true;
-          cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
-               << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
-               << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
-               << temp->GetQuantity() << "\n";
-        }
-      }
-      cur = cur->next;
-    }
-    if (!flag)
-      cout << "\n";
-  }
-
-  void KeywordShow(const string &s) {
-    bool flag = false;
-    if (book_system.total == 0) {
-      // 在链表头存入
+    if (name_map[name].empty()) {
       cout << "\n";
       return;
     }
-    Block *cur = &head;
-    auto temp = new Book;
-    while (cur != nullptr) {
-      for (int i = 0; i < cur->size; i++) {
-        book_system.Read(*temp, cur->index[i]);
-        if (temp->KeywordJudge(s)) {
-          // 是关键字
-          flag = true;
-          cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
-               << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
-               << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
-               << temp->GetQuantity() << "\n";
-        }
-      }
-      cur = cur->next;
-    }
-    if (!flag)
-      cout << "\n";
   }
 
-  double Buy(char isbn[isbn_len + 1], const long long x) {
-    if (book_system.total == 0) {
+  void AuthorShow(const string &author) {
+    if (author_map.find(author) == author_map.end()) {
+      cout << "\n";
+      return;
+    }
+    if (author_map[author].empty()) {
+      cout << "\n";
+      return;
+    }
+  }
+
+  void KeywordShow(const string &keyword) {
+    if (keyword_map.find(keyword) == keyword_map.end()) {
+      cout << "\n";
+      return;
+    }
+    if (author_map[keyword].empty()) {
+      cout << "\n";
+      return;
+    }
+  }
+
+  double Buy(const string &isbn, const long long x) {
+    if (keyword_map.find(isbn) == keyword_map.end()) {
       return -1;
     }
-    Block *cur = &head;
-    while (cur != nullptr) {
-      if (strcmp(isbn, cur->max_isbn) > 0) {
-        cur = cur->next;
-      } else {
-        auto temp = new Book;
-        for (int i = 0; i < cur->size; i++) {
-          book_system.Read(*temp, cur->index[i]);
-          if (strcmp(isbn, temp->GetIsbn().data()) < 0) {
-            // 当前位置的ISBN大于目标isbn
-            delete temp;
-            return -1;
-          }
-          if (strcmp(isbn, temp->GetIsbn().data()) == 0) {
-            // 相同isbn
-            const bool flag = temp->ModifyQuantity(x);
-            book_system.Update(*temp, cur->index[i]);
-            delete temp;
-            if (flag) {
-              return temp->GetPrice() * x;
-            }
-            return -1;
-          }
-        }
-        delete temp;
-        return -1;
-      }
+    const int idx = isbn_map[isbn];
+    auto temp = new Book;
+    book_system.Read(*temp, idx);
+    const bool flag = temp->ModifyQuantity(x);
+    if (flag) {
+      book_system.Update(*temp, idx);
+      delete temp;
+      return temp->GetPrice() * x;
     }
-    return false;
+    delete temp;
+    return -1;
   }
 
-  void Select(char isbn[isbn_len + 1]) {
-    if (book_system.total == 0) {
+  void Select(const string &isbn) {
+    if (isbn_map.find(isbn) == isbn_map.end()) {
       Book new_book = {isbn, "", "", "", 0, 0};
-      selected_book_idx = this->Insert(new_book);
+      selected_book_idx = book_system.Push(new_book);
+      isbn_map[isbn] = selected_book_idx;
+      return;
     }
-    Block *cur = &head;
-    while (cur != nullptr) {
-      if (strcmp(isbn, cur->max_isbn) > 0) {
-        cur = cur->next;
-      } else {
-        auto temp = new Book;
-        for (int i = 0; i < cur->size; i++) {
-          book_system.Read(*temp, cur->index[i]);
-          if (strcmp(isbn, temp->GetIsbn().data()) < 0) {
-            // 当前位置的ISBN大于目标isbn
-            Book new_book = {isbn, "", "", "", 0, 0};
-            selected_book_idx = this->Insert(new_book);
-            delete temp;
-            return;
-          }
-          if (strcmp(isbn, temp->GetIsbn().data()) == 0) {
-            // 相同isbn
-            selected_book_idx = cur->index[i];
-            delete temp;
-            return;
-          }
-        }
-        delete temp;
-        Book new_book = {isbn, "", "", "", 0, 0};
-        selected_book_idx = this->Insert(new_book);
-        return;
-      }
-    }
-    Book new_book = {isbn, "", "", "", 0, 0};
-    selected_book_idx = this->Insert(new_book);
+    selected_book_idx = isbn_map[isbn];
   }
 
   bool Import(const long long x, double cost) {
@@ -426,11 +209,15 @@ public:
   bool IsbnModify(const string &isbn) {
     auto temp = new Book;
     book_system.Read(*temp, selected_book_idx);
-    if (temp->GetIsbn() == isbn) {
+    const string pre_isbn = temp->GetIsbn();
+    if (pre_isbn == isbn) {
       delete temp;
       return false;
     }
     temp->ModifyIsbn(isbn);
+    auto it = isbn_map.find(pre_isbn);
+    isbn_map.erase(it);
+    isbn_map[isbn] = selected_book_idx;
     book_system.Update(*temp, selected_book_idx);
     delete temp;
     return true;
@@ -439,6 +226,13 @@ public:
   void NameModify(const string &name) {
     auto temp = new Book;
     book_system.Read(*temp, selected_book_idx);
+    const string s = temp->GetName();
+    if (!s.empty()) {
+      auto v = name_map.find(s)->second;
+      auto iter = std::remove(v.begin(), v.end(), selected_book_idx);
+      v.erase(iter, v.end());
+    }
+    name_map[name].push_back(selected_book_idx);
     temp->ModifyName(name);
     book_system.Update(*temp, selected_book_idx);
     delete temp;
@@ -447,7 +241,14 @@ public:
   void AuthorModify(const string &author) {
     auto temp = new Book;
     book_system.Read(*temp, selected_book_idx);
-    temp->ModifyAuthor(author);
+    const string s = temp->GetAuthor();
+    if (!s.empty()) {
+      auto v = author_map.find(s)->second;
+      auto iter = std::remove(v.begin(), v.end(), selected_book_idx);
+      v.erase(iter, v.end());
+    }
+    author_map[author].push_back(selected_book_idx);
+    temp->ModifyName(author);
     book_system.Update(*temp, selected_book_idx);
     delete temp;
   }
@@ -455,7 +256,22 @@ public:
   void KeywordModify(const string &keyword) {
     auto temp = new Book;
     book_system.Read(*temp, selected_book_idx);
-    temp->ModifyKeyword(keyword);
+    string s = temp->GetKeyword();
+    if (!s.empty()) {
+      std::vector<string> keywords;
+      SpiltKeyword(s, keywords);
+      for (const auto &i : keywords) {
+        auto v = keyword_map.find(i)->second;
+        auto iter = std::remove(v.begin(), v.end(), selected_book_idx);
+        v.erase(iter, v.end());
+      }
+    }
+    std::vector<string> new_keywords;
+    SpiltKeyword(keyword, new_keywords);
+    for (const auto &j : new_keywords) {
+      keyword_map[j].push_back(selected_book_idx);
+    }
+    temp->ModifyName(keyword);
     book_system.Update(*temp, selected_book_idx);
     delete temp;
   }

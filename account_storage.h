@@ -50,13 +50,11 @@ public:
   }
 
   void Update(Account &new_account, const int n) {
-    // 更新第n本书的信息
     account_data.seekp((n - 1) * sizeof(Account));
     account_data.write(reinterpret_cast<char *>(&new_account), sizeof(Account));
   }
 
   int Push(Account &new_account) {
-    // 在尾部写入新书
     total++;
     account_data.seekp((total - 1) * sizeof(Account));
     account_data.write(reinterpret_cast<char *>(&new_account), sizeof(Account));
