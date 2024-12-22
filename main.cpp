@@ -144,6 +144,7 @@ int main() {
       if (list.size() != 1 || MyUser.cur_privilege < 1)
         cout << "Invalid\n";
       else {
+        MyBook.selected_book_idx = 0;
         user_stack.pop_back();
         if (user_stack.empty()) {
           MyUser.cur_privilege = 0;
@@ -374,8 +375,7 @@ int main() {
             break;
           }
           is_isbn = true;
-        }
-        if (p[i].first == "-name") {
+        } else if (p[i].first == "-name") {
           if (p[i].second.length() < 2 || p[i].second.front() != '\"' ||
               p[i].second.back() != '\"') {
             cout << "Invalid\n";
@@ -389,8 +389,7 @@ int main() {
             break;
           }
           is_name = true;
-        }
-        if (p[i].first == "-author") {
+        } else if (p[i].first == "-author") {
           if (p[i].second.length() < 2 || p[i].second.front() != '\"' ||
               p[i].second.back() != '\"') {
             cout << "Invalid\n";
@@ -404,8 +403,7 @@ int main() {
             break;
           }
           is_author = true;
-        }
-        if (p[i].first == "-keyword") {
+        } else if (p[i].first == "-keyword") {
           if (p[i].second.length() < 2 || p[i].second.front() != '\"' ||
               p[i].second.back() != '\"') {
             cout << "Invalid\n";
@@ -437,18 +435,17 @@ int main() {
             isvalid = false;
             break;
           }
-        } else {
-          cout << "Invalid\n";
-          isvalid = false;
-          break;
-        }
-        if (p[i].first == "-price") {
+        } else if (p[i].first == "-price") {
           if (is_price || !IsPrice(StringToDouble(p[i].second))) {
             cout << "Invalid\n";
             isvalid = false;
             break;
           }
           is_price = true;
+        } else {
+          cout << "Invalid\n";
+          isvalid = false;
+          break;
         }
       }
       if (!isvalid)

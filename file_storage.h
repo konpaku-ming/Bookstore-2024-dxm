@@ -32,6 +32,7 @@ public:
   void initialize(string FN = "") {
     if (access(file_name.c_str(), F_OK) == 0) {
       // 检查文件是否存在
+      book_data.seekg(0);
       book_data.read(reinterpret_cast<char *>(&total), sizeof(int));
       return;
     }
@@ -104,20 +105,29 @@ public:
     delete now;
   }
 
+  void Save() {
+    book_system.book_data.seekp(0);
+    book_system.book_data.write(reinterpret_cast<char *>(&book_system.total),
+                                sizeof(int));
+  }
+
   void AllShow() {
     if (book_system.total == 0) {
       cout << "\n";
       return;
     }
-    auto temp = new Book;
-    for (int i = 1; i <= book_system.total; i++) {
-      book_system.Read(*temp, i);
-      cout << temp->GetIsbn() << "\t" << temp->GetName() << "\t"
-           << temp->GetAuthor() << "\t" << temp->GetKeyword() << "\t"
-           << std::fixed << std::setprecision(2) << temp->GetPrice() << "\t"
-           << temp->GetQuantity() << "\n";
+    const int size_ = book_system.total;
+    Book temp[size_];
+    for (int i = 1; i <= size_; i++) {
+      book_system.Read(temp[i - 1], i);
     }
-    delete temp;
+    std::sort(temp, temp + size_, cmp);
+    for (int i = 0; i < size_; i++) {
+      cout << temp[i].GetIsbn() << "\t" << temp[i].GetName() << "\t"
+           << temp[i].GetAuthor() << "\t" << temp[i].GetKeyword() << "\t"
+           << std::fixed << std::setprecision(2) << temp[i].GetPrice() << "\t"
+           << temp[i].GetQuantity() << "\n";
+    }
   }
 
   void IsbnShow(const string &isbn) {
@@ -284,7 +294,7 @@ public:
       v.erase(iter, v.end());
     }
     author_map[author].push_back(selected_book_idx);
-    temp->ModifyName(author);
+    temp->ModifyAuthor(author);
     book_system.Update(*temp, selected_book_idx);
     delete temp;
   }
@@ -307,7 +317,7 @@ public:
     for (const auto &j : new_keywords) {
       keyword_map[j].push_back(selected_book_idx);
     }
-    temp->ModifyName(keyword);
+    temp->ModifyKeyword(keyword);
     book_system.Update(*temp, selected_book_idx);
     delete temp;
   }
