@@ -130,13 +130,13 @@ public:
     linked_block.close();
   }
 
-  void Insert(Book &x) {
+  int Insert(Book &x) {
     if (book_system.total == 0) {
       // 在链表头存入
       head.index[head.size] = book_system.Push(x);
       head.size++;
       strcpy(head.max_isbn, x.GetIsbn().data());
-      return;
+      return head.index[head.size - 1];
     }
     Block *cur = &head;
     while (cur != nullptr) {
@@ -151,16 +151,12 @@ public:
             // 大于当前位置
             continue;
           }
-          if (x == *temp) {
-            // 相同isbn
-            delete temp;
-            return;
-          }
           for (int j = cur->size - 1; j >= i; j--) {
             cur->index[j + 1] = cur->index[j];
           }
           cur->size++;
           cur->index[i] = book_system.Push(x);
+          const int idx = cur->index[i];
           if (cur->size > max_size) {
             block_number++;
             auto new_block = new Block;
@@ -178,10 +174,11 @@ public:
             new_block = nullptr;
           }
           delete temp;
-          return;
+          return idx;
         }
         strcpy(cur->max_isbn, x.GetIsbn().data());
         cur->index[cur->size] = book_system.Push(x);
+        const int idx = cur->index[cur->size];
         cur->size++;
         if (cur->size > max_size) {
           block_number++;
@@ -200,7 +197,7 @@ public:
           new_block = nullptr;
         }
         delete temp;
-        return;
+        return idx;
       }
     }
   }
@@ -381,7 +378,7 @@ public:
   void Select(char isbn[isbn_len + 1]) {
     if (book_system.total == 0) {
       Book new_book = {isbn, "", "", "", 0, 0};
-      this->Insert(new_book);
+      selected_book_idx = this->Insert(new_book);
     }
     Block *cur = &head;
     while (cur != nullptr) {
@@ -394,7 +391,7 @@ public:
           if (strcmp(isbn, temp->GetIsbn().data()) < 0) {
             // 当前位置的ISBN大于目标isbn
             Book new_book = {isbn, "", "", "", 0, 0};
-            this->Insert(new_book);
+            selected_book_idx = this->Insert(new_book);
             delete temp;
             return;
           }
@@ -407,12 +404,12 @@ public:
         }
         delete temp;
         Book new_book = {isbn, "", "", "", 0, 0};
-        this->Insert(new_book);
+        selected_book_idx = this->Insert(new_book);
         return;
       }
     }
     Book new_book = {isbn, "", "", "", 0, 0};
-    this->Insert(new_book);
+    selected_book_idx = this->Insert(new_book);
   }
 
   bool Import(const long long x, double cost) {
