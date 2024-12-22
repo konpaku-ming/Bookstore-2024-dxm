@@ -106,6 +106,7 @@ int main() {
       } else {
         MyUser.Save();
         MyBook.Save();
+        MyFinance.Save();
         exit(0);
       }
     } else if (list[0] == "su") {
