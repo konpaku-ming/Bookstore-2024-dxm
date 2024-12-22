@@ -28,15 +28,16 @@ public:
 
   void Init(string FN = "") {
     if (access(file_name.c_str(), F_OK) == 0) {
+      log_data.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
       // 检查文件是否存在
       return;
     }
     if (FN != "") {
       file_name = FN;
     }
-    log_data.open(file_name, std::ios_base::out);
+    log_data.open(file_name, std::ios::out | std::ios::binary);
     log_data.close();
-    log_data.open(file_name, std::ios_base::in | std::ios_base::out);
+    log_data.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
   }
 
   void Read(double &tmp, int n) {
@@ -50,7 +51,7 @@ public:
     log_data.write(reinterpret_cast<char *>(&tmp), sizeof(double));
   }
 
-  bool FinanceReport(const int count) {
+  bool FinanceReport(const long long count) {
     if (count > info_len || count < 0)
       return false;
     if (count == 0) {

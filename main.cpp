@@ -93,7 +93,7 @@ int main() {
   MyBook.Restore();
   MyUser.Init();
   MyUser.Restore();
-  MyFinance.Init();
+  MyFinance.Init("finance_log");
   MyFinance.Restore();
   string cmd;
   std::vector<string> list;
@@ -135,12 +135,6 @@ int main() {
       default:
         cout << "Invalid\n";
       }
-      if (user_stack.empty()) {
-        // cout << "no login"
-        //      << "\n"; // TODO delete this
-        continue;
-      }
-      // cout << user_stack.back() << "\n"; // TODO delete this
     } else if (list[0] == "logout") {
       if (list.size() != 1 || MyUser.cur_privilege < 1)
         cout << "Invalid\n";
@@ -155,12 +149,6 @@ int main() {
           strcpy(id, user_stack.back().c_str());
           MyUser.EnforcingLogin(id);
         }
-        if (user_stack.empty()) {
-          // cout << "no login"
-          //      << "\n"; // TODO delete this
-          continue;
-        }
-        // cout << user_stack.back() << "\n"; // TODO delete this
       }
     } else if (list[0] == "register") {
       if (list.size() != 4) {
@@ -248,7 +236,7 @@ int main() {
           break;
         }
         case 3: {
-          const int count = StringToInt(list[2]);
+          const long long count = StringToInt(list[2]);
           MyFinance.FinanceReport(count);
           break;
         }
