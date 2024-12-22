@@ -44,8 +44,6 @@ public:
   void ModifyPrice(double);
 
   bool ModifyQuantity(long long);
-
-  bool KeywordJudge(const string &) const;
 };
 
 bool IsIsbn(const string &s);

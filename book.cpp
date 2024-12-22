@@ -131,34 +131,6 @@ bool Book::ModifyQuantity(const long long x) {
   return true;
 }
 
-bool Book::KeywordJudge(const string &s) const {
-  int r = 0, l = 0;
-  const string str = this->GetKeyword();
-  while (r != str.length()) {
-    while (str[r] != '|') {
-      r++;
-    }
-    if (r - l != s.length())
-      continue;
-    for (int i = 0; i < s.length(); i++) {
-      if (s[i] != str[r + i])
-        break;
-      if (i == s.length() - 1)
-        return true;
-    }
-    l = r + 1;
-  }
-  if (r - l != s.length())
-    return false;
-  for (int i = 0; i < s.length(); i++) {
-    if (s[i] != str[r + i])
-      break;
-    if (i == s.length() - 1)
-      return true;
-  }
-  return false;
-}
-
 void SpiltKeyword(const string &str, std::vector<string> &list, char c) {
   list.clear();
   if (c == ' ' && str.empty())

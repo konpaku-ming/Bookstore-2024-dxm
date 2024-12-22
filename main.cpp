@@ -107,6 +107,7 @@ int main() {
         cout << "Invalid\n";
       } else {
         MyUser.Save();
+        MyBook.Save();
         MyFinance.Save();
         exit(0);
       }

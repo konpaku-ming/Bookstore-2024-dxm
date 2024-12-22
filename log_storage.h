@@ -1,5 +1,6 @@
 #ifndef LOG_STORAGE_H
 #define LOG_STORAGE_H
+#include <cmath>
 
 class FinanceDatabase {
 private:
@@ -16,7 +17,7 @@ public:
   ~FinanceDatabase() { log_data.close(); }
 
   void Restore() {
-    log_data.seekp(0);
+    log_data.seekg(0);
     log_data.read(reinterpret_cast<char *>(&info_len), sizeof(int));
   }
 
@@ -59,8 +60,8 @@ public:
     double temp;
     double in = 0;
     double out = 0;
-    for (int i = info_len - count; i < info_len; i++) {
-      this->Read(temp, i);
+    for (int i = info_len - count + 1; i <= info_len; i++) {
+      Read(temp, i);
       if (temp > 0) {
         in += temp;
       } else {
@@ -68,7 +69,7 @@ public:
       }
     }
     std::cout << "+ " << std::fixed << std::setprecision(2) << in << " - "
-              << std::fixed << std::setprecision(2) << -out << "\n";
+              << std::fixed << std::setprecision(2) << fabs(out) << "\n";
     return true;
   }
 };

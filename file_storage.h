@@ -3,6 +3,7 @@
 
 #include "book.h"
 #include <algorithm>
+#include <cassert>
 #include <cstring>
 #include <fstream>
 #include <iomanip>
@@ -196,7 +197,7 @@ public:
       cout << "\n";
       return;
     }
-    if (author_map[keyword].empty()) {
+    if (keyword_map[keyword].empty()) {
       cout << "\n";
       return;
     }
@@ -215,7 +216,7 @@ public:
   }
 
   double Buy(const string &isbn, const long long x) {
-    if (keyword_map.find(isbn) == keyword_map.end()) {
+    if (isbn_map.find(isbn) == isbn_map.end()) {
       return -1;
     }
     const int idx = isbn_map[isbn];
