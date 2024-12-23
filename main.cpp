@@ -101,8 +101,10 @@ int main() {
     getline(cin, cmd);
     SpiltCommand(cmd, list);
     if (list.empty()) {
-      cout << "Invalid\n";
-      continue;
+      MyUser.Save();
+      MyBook.Save();
+      MyFinance.Save();
+      break;
     } else if (list[0] == "quit" || list[0] == "exit") {
       if (list.size() > 1) {
         cout << "Invalid\n";

@@ -67,7 +67,7 @@ bool IsTotalCost(const double x) {
 
 bool IsPrice(const double x) {
   // 检查是否为合法的price
-  if (x <= 0) {
+  if (x < 0) {
     return false;
   }
   return true;
