@@ -46,6 +46,10 @@ public:
   bool ModifyQuantity(long long);
 };
 
+bool IsInt(const string &s);
+
+bool IsDouble(const string &s);
+
 bool IsIsbn(const string &s);
 
 bool IsName(const string &s);

@@ -479,6 +479,10 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
+      if (!IsInt(list[1]) || !IsDouble(list[2])) {
+        cout << "Invalid\n";
+        continue;
+      }
       const long long x = StringToInt(list[1]);
       const double cost = StringToDouble(list[2]);
       if (!MyBook.Import(x, cost)) {

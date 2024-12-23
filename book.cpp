@@ -1,6 +1,27 @@
 #include "book.h"
 
 #include <cstring>
+bool IsInt(const string &s) {
+  if (s.length() > 10) {
+    return false;
+  }
+  for (int i = 0; i < s.length(); i++) {
+    if (!isdigit(s[i]))
+      return false;
+  }
+  return true;
+}
+
+bool IsDouble(const string &s) {
+  if (s.length() > 13) {
+    return false;
+  }
+  for (int i = 0; i < s.length(); i++) {
+    if (!isdigit(s[i]) && s[i] != '-' && s[i] != '.')
+      return false;
+  }
+  return true;
+}
 
 bool IsIsbn(const string &s) {
   // 检查是否为合法的ISBN

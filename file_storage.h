@@ -218,8 +218,9 @@ public:
     const bool flag = temp->ModifyQuantity(x);
     if (flag) {
       book_system.Update(*temp, idx);
+      const double income = temp->GetPrice() * x;
       delete temp;
-      return temp->GetPrice() * x;
+      return income;
     }
     delete temp;
     return -1;
