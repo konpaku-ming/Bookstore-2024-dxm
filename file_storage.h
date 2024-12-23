@@ -21,7 +21,6 @@ class BookManage {
   friend BookDatabase;
 
 private:
-  std::string file_name;
   std::fstream book_data;
   int total = 0; // 留一个int存储总本数
 
@@ -30,19 +29,17 @@ public:
 
   ~BookManage() { book_data.close(); }
 
-  void initialize(string FN = "") {
-    if (FN != "") {
-      file_name = FN;
-    }
-    if (access(file_name.c_str(), F_OK) == 0) {
+  void initialize() {
+    if (access("booksystem", F_OK) == 0) {
       // 检查文件是否存在
-      book_data.open(file_name, std::ios_base::in | std::ios_base::out);
+      book_data.open("booksystem", std::ios_base::in | std::ios_base::out);
       book_data.seekg(0);
       book_data.read(reinterpret_cast<char *>(&total), sizeof(int));
       return;
     }
-    book_data.open(file_name, std::ios_base::out);
+    book_data.open("booksystem", std::ios_base::out);
     book_data.close();
+    book_data.open("booksystem", std::ios_base::in | std::ios_base::out);
   }
 
   void Read(Book &dest, const int n) {
@@ -82,15 +79,11 @@ public:
 
   void Init() {
     // 初始化，给文件一个名字
-    book_system.initialize("booksystem");
+    book_system.initialize();
   }
 
   void Restore() {
     // 把一部分外存信息写回内存
-    if (access("all_book", F_OK) != 0) {
-      // 检查文件是否存在
-      return;
-    }
     auto now = new Book;
     for (int i = 1; i <= book_system.total; i++) {
       book_system.Read(*now, i);
@@ -99,8 +92,8 @@ public:
       author_map[now->GetAuthor()].push_back(i);
       std::vector<string> keywords;
       SpiltKeyword(now->GetKeyword(), keywords);
-      for (int j = 0; i < keywords.size(); j++) {
-        keyword_map[keywords[i]].push_back(i);
+      for (const auto &j : keywords) {
+        keyword_map[j].push_back(i);
       }
     }
     delete now;

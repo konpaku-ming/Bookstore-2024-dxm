@@ -100,9 +100,10 @@ int main() {
   while (true) {
     getline(cin, cmd);
     SpiltCommand(cmd, list);
-    if (list.empty())
+    if (list.empty()) {
+      cout << "Invalid\n";
       continue;
-    if (list[0] == "quit" || list[0] == "exit") {
+    } else if (list[0] == "quit" || list[0] == "exit") {
       if (list.size() > 1) {
         cout << "Invalid\n";
       } else {
