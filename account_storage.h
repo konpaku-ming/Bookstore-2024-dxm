@@ -28,12 +28,13 @@ public:
   ~AccountManage() { account_data.close(); }
 
   void initialize(string FN = "") {
-    if (access(file_name.c_str(), F_OK) == 0) {
-      // 检查文件是否存在
-      return;
-    }
     if (FN != "") {
       file_name = FN;
+    }
+    if (access(file_name.c_str(), F_OK) == 0) {
+      // 检查文件是否存在
+      account_data.open(file_name, std::ios_base::in | std::ios_base::out);
+      return;
     }
     account_data.open(file_name, std::ios_base::out);
     account_data.close();
@@ -106,6 +107,12 @@ public:
       back_up.read(reinterpret_cast<char *>(&temp), sizeof(HashPair));
       hash_map[temp.id] = temp.value;
     }
+    /*
+    for (auto &t : hash_map) {
+      std::cout << t.first << " " << t.second << "\n";
+    }
+    std::cout << total << " restore\n";
+    */
     back_up.close();
   }
 
@@ -130,21 +137,20 @@ public:
     hash_map.clear();
   }
 
-  bool Login(const char id[id_len + 1],
-             const char password_[password_len + 1]) {
+  bool Login(const string &id, const string &password_) {
     if (hash_map.find(id) == hash_map.end()) {
       return false;
     }
-    int number = hash_map[id];
+    const int number = hash_map[id];
     auto cur = new Account;
     account_system.Read(*cur, number);
-    if (cur_privilege > cur->GetPrivilege() && password_ == "") {
+    if (cur_privilege > cur->GetPrivilege() && password_.empty()) {
       cur_privilege = cur->GetPrivilege();
       cur_idx = number;
       delete cur;
       return true;
     }
-    if (strcmp(password_, cur->GetPassword().data()) == 0) {
+    if (password_ == cur->GetPassword()) {
       cur_privilege = cur->GetPrivilege();
       cur_idx = number;
       delete cur;
@@ -209,15 +215,13 @@ public:
       return false;
     if (cur_privilege <= x.GetPrivilege())
       return false;
-    char x_id[id_len + 1];
-    strcpy(x_id, x.GetId().data());
-    if (hash_map.find(x_id) != hash_map.end()) {
+    if (hash_map.find(x.GetId()) != hash_map.end()) {
       return false;
     }
     cnt++;
     account_system.total++;
     account_system.Update(x, cnt);
-    hash_map[x_id] = cnt;
+    hash_map[x.GetId()] = cnt;
     return true;
   }
 

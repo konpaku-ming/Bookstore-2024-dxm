@@ -109,24 +109,19 @@ int main() {
         MyUser.Save();
         MyBook.Save();
         MyFinance.Save();
-        exit(0);
+        break;
       }
     } else if (list[0] == "su") {
-      char id[id_len + 1]{};
-      char password[password_len + 1]{};
       switch (list.size()) {
       case 2: {
-        strcpy(id, list[1].data());
-        if (MyUser.Login(id, ""))
+        if (MyUser.Login(list[1], ""))
           user_stack.push_back(list[1]);
         else
           cout << "Invalid\n";
         break;
       }
       case 3: {
-        strcpy(id, list[1].data());
-        strcpy(password, list[2].data());
-        if (MyUser.Login(id, password))
+        if (MyUser.Login(list[1], list[2]))
           user_stack.push_back(list[1]);
         else
           cout << "Invalid\n";

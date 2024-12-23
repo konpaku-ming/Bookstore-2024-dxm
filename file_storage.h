@@ -31,18 +31,18 @@ public:
   ~BookManage() { book_data.close(); }
 
   void initialize(string FN = "") {
+    if (FN != "") {
+      file_name = FN;
+    }
     if (access(file_name.c_str(), F_OK) == 0) {
       // 检查文件是否存在
+      book_data.open(file_name, std::ios_base::in | std::ios_base::out);
       book_data.seekg(0);
       book_data.read(reinterpret_cast<char *>(&total), sizeof(int));
       return;
     }
-    if (FN != "") {
-      file_name = FN;
-    }
     book_data.open(file_name, std::ios_base::out);
     book_data.close();
-    book_data.open(file_name, std::ios_base::in | std::ios_base::out);
   }
 
   void Read(Book &dest, const int n) {
