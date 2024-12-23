@@ -38,6 +38,8 @@ public:
     log_data.open(file_name, std::ios::out | std::ios::binary);
     log_data.close();
     log_data.open(file_name, std::ios::in | std::ios::out | std::ios::binary);
+    int zero = 0;
+    log_data.write(reinterpret_cast<char *>(&zero), sizeof(int));
   }
 
   void Read(double &tmp, int n) {

@@ -257,7 +257,7 @@ public:
     auto temp = new Book;
     book_system.Read(*temp, selected_book_idx);
     const string pre_isbn = temp->GetIsbn();
-    if (pre_isbn == isbn) {
+    if (isbn_map.find(isbn) != isbn_map.end()) {
       delete temp;
       return false;
     }

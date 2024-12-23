@@ -237,7 +237,9 @@ int main() {
         }
         case 3: {
           const long long count = StringToInt(list[2]);
-          MyFinance.FinanceReport(count);
+          if (!MyFinance.FinanceReport(count)) {
+            cout << "Invalid\n";
+          }
           break;
         }
         default:
