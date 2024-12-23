@@ -14,6 +14,7 @@ BookDatabase MyBook;
 AccountDatabase MyUser;
 FinanceDatabase MyFinance("finance_log");
 std::vector<string> user_stack;
+std::vector<int> selected_book_stack;
 using std::cin;
 using std::vector;
 
@@ -117,17 +118,23 @@ int main() {
     } else if (list[0] == "su") {
       switch (list.size()) {
       case 2: {
+        selected_book_stack.push_back(MyBook.selected_book_idx);
         if (MyUser.Login(list[1], ""))
           user_stack.push_back(list[1]);
-        else
+        else {
+          selected_book_stack.pop_back();
           cout << "Invalid\n";
+        }
         break;
       }
       case 3: {
+        selected_book_stack.push_back(MyBook.selected_book_idx);
         if (MyUser.Login(list[1], list[2]))
           user_stack.push_back(list[1]);
-        else
+        else {
+          selected_book_stack.pop_back();
           cout << "Invalid\n";
+        }
         break;
       }
       default:
@@ -137,8 +144,9 @@ int main() {
       if (list.size() != 1 || MyUser.cur_privilege < 1)
         cout << "Invalid\n";
       else {
-        MyBook.selected_book_idx = 0;
         user_stack.pop_back();
+        MyBook.selected_book_idx = selected_book_stack.back();
+        selected_book_stack.pop_back();
         if (user_stack.empty()) {
           MyUser.cur_privilege = 0;
           MyUser.cur_idx = 0;

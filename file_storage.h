@@ -268,9 +268,10 @@ public:
     book_system.Read(*temp, selected_book_idx);
     const string s = temp->GetName();
     if (!s.empty()) {
-      auto v = name_map.find(s)->second;
-      auto iter = std::remove(v.begin(), v.end(), selected_book_idx);
-      v.erase(iter, v.end());
+      auto v = name_map.find(s);
+      auto iter =
+          std::remove(v->second.begin(), v->second.end(), selected_book_idx);
+      v->second.erase(iter, v->second.end());
     }
     name_map[name].push_back(selected_book_idx);
     temp->ModifyName(name);
@@ -283,9 +284,10 @@ public:
     book_system.Read(*temp, selected_book_idx);
     const string s = temp->GetAuthor();
     if (!s.empty()) {
-      auto v = author_map.find(s)->second;
-      auto iter = std::remove(v.begin(), v.end(), selected_book_idx);
-      v.erase(iter, v.end());
+      auto v = author_map.find(s);
+      auto iter =
+          std::remove(v->second.begin(), v->second.end(), selected_book_idx);
+      v->second.erase(iter, v->second.end());
     }
     author_map[author].push_back(selected_book_idx);
     temp->ModifyAuthor(author);
@@ -301,9 +303,10 @@ public:
       std::vector<string> keywords;
       SpiltKeyword(s, keywords);
       for (const auto &i : keywords) {
-        auto v = keyword_map.find(i)->second;
-        auto iter = std::remove(v.begin(), v.end(), selected_book_idx);
-        v.erase(iter, v.end());
+        auto v = keyword_map.find(i);
+        auto iter =
+            std::remove(v->second.begin(), v->second.end(), selected_book_idx);
+        v->second.erase(iter, v->second.end());
       }
     }
     std::vector<string> new_keywords;
