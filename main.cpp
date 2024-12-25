@@ -195,6 +195,10 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
+      if (!IsInt(list[3])) {
+        cout << "Invalid\n";
+        continue;
+      }
       const int privilege_ = StringToInt(list[3]);
       if (IsId(list[1]) && IsPassword(list[2]) && IsUserName(list[4]) &&
           IsPrivilege(privilege_)) {
@@ -235,7 +239,15 @@ int main() {
           break;
         }
         case 3: {
+          if (!IsInt(list[2])) {
+            cout << "Invalid\n";
+            break;
+          }
           const long long count = StringToInt(list[2]);
+          if (!IsQuantity(count)) {
+            cout << "Invalid\n";
+            break;
+          }
           if (!MyFinance.FinanceReport(count)) {
             cout << "Invalid\n";
           }
@@ -340,9 +352,7 @@ int main() {
         continue;
       }
       if (IsIsbn(list[1])) {
-        char isbn[isbn_len + 1];
-        strcpy(isbn, list[1].data());
-        MyBook.Select(isbn);
+        MyBook.Select(list[1]);
       } else {
         cout << "Invalid\n";
       }
