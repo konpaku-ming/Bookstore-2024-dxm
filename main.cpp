@@ -316,6 +316,10 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
+      if (!IsInt(list[2])) {
+        cout << "Invalid\n";
+        continue;
+      }
       const long long quantity = StringToInt(list[2]);
       if (IsIsbn(list[1]) && IsQuantity(quantity)) {
         char isbn[isbn_len + 1]{};

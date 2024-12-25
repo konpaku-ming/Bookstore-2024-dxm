@@ -83,6 +83,9 @@ bool IsQuantity(const long long x) {
   if (x <= 0) {
     return false;
   }
+  if (x > 2147483647) {
+    return false;
+  }
   return true;
 }
 
