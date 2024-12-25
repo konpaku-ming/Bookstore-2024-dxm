@@ -98,21 +98,14 @@ int main() {
   MyFinance.Restore();
   string cmd;
   std::vector<string> list;
-  while (true) {
-    getline(cin, cmd);
+  while (getline(cin, cmd)) {
     SpiltCommand(cmd, list);
     if (list.empty()) {
-      MyUser.Save();
-      MyBook.Save();
-      MyFinance.Save();
-      break;
+      continue;
     } else if (list[0] == "quit" || list[0] == "exit") {
       if (list.size() > 1) {
         cout << "Invalid\n";
       } else {
-        MyUser.Save();
-        MyBook.Save();
-        MyFinance.Save();
         break;
       }
     } else if (list[0] == "su") {
@@ -494,5 +487,8 @@ int main() {
       cout << "Invalid\n";
     }
   }
+  MyUser.Save();
+  MyBook.Save();
+  MyFinance.Save();
   return 0;
 }
