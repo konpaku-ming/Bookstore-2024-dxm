@@ -2,7 +2,7 @@
 
 #include <cstring>
 bool IsInt(const string &s) {
-  if (s.length() > 10) {
+  if (s.empty() || s.length() > 10) {
     return false;
   }
   for (int i = 0; i < s.length(); i++) {
@@ -13,12 +13,20 @@ bool IsInt(const string &s) {
 }
 
 bool IsDouble(const string &s) {
-  if (s.length() > 13) {
+  if (s.empty() || s.length() > 13) {
     return false;
   }
+  if (s.front() == '.') {
+    return false;
+  }
+  bool is_point = false;
   for (int i = 0; i < s.length(); i++) {
-    if (!isdigit(s[i]) && s[i] != '-' && s[i] != '.')
-      return false;
+    if (!isdigit(s[i])) {
+      if (s[i] == '.' && !is_point) {
+        is_point = true;
+      } else
+        return false;
+    }
   }
   return true;
 }
