@@ -175,6 +175,10 @@ int main() {
       char new_password[password_len + 1]{};
       switch (list.size()) {
       case 3: {
+        if (!IsPassword(list[2])) {
+          cout << "Invalid\n";
+          break;
+        }
         strcpy(id, list[1].c_str());
         strcpy(new_password, list[2].c_str());
         if (!MyUser.ChangePassword(id, "", new_password)) {
@@ -183,6 +187,10 @@ int main() {
         break;
       }
       case 4: {
+        if (!IsPassword(list[3])) {
+          cout << "Invalid\n";
+          break;
+        }
         strcpy(id, list[1].c_str());
         strcpy(password, list[2].c_str());
         strcpy(new_password, list[3].c_str());
