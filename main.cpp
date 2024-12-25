@@ -429,7 +429,7 @@ int main() {
             break;
           }
           p[i].second = p[i].second.substr(1, p[i].second.length() - 2);
-          if (is_keyword) {
+          if (is_keyword || p[i].second.length() > keyword_len) {
             cout << "Invalid\n";
             isvalid = false;
             break;
