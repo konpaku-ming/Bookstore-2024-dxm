@@ -99,6 +99,10 @@ int main() {
   string cmd;
   std::vector<string> list;
   while (getline(cin, cmd)) {
+    if (cmd.length() > 1024) {
+      cout << "Invalid\n";
+      continue;
+    }
     SpiltCommand(cmd, list);
     if (list.empty()) {
       continue;
@@ -134,7 +138,7 @@ int main() {
         cout << "Invalid\n";
       }
     } else if (list[0] == "logout") {
-      if (list.size() != 1 || MyUser.cur_privilege < 1)
+      if (list.size() != 1 || MyUser.cur_privilege < 1 || user_stack.empty())
         cout << "Invalid\n";
       else {
         user_stack.pop_back();
@@ -213,6 +217,10 @@ int main() {
         cout << "Invalid\n";
       }
     } else if (list[0] == "delete") {
+      if (!IsId(list[1])) {
+        cout << "Invalid\n";
+        continue;
+      }
       if (find(user_stack.begin(), user_stack.end(), list[1]) !=
           user_stack.end()) {
         cout << "Invalid\n";
