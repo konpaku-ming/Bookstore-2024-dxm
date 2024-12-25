@@ -482,7 +482,7 @@ int main() {
       }
       const long long x = StringToInt(list[1]);
       const double cost = StringToDouble(list[2]);
-      if (!IsQuantity(x) && !IsTotalCost(cost)) {
+      if (!IsQuantity(x) || !IsTotalCost(cost)) {
         cout << "Invalid\n";
         continue;
       }
