@@ -80,7 +80,7 @@ bool IsKeyword(const string &s) {
 
 bool IsQuantity(const long long x) {
   // 检查是否为合法的Quantity
-  if (x < 0) {
+  if (x <= 0) {
     return false;
   }
   if (x > 2147483647) {
