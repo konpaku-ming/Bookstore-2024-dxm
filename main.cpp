@@ -334,9 +334,7 @@ int main() {
       }
       const long long quantity = StringToInt(list[2]);
       if (IsIsbn(list[1]) && IsQuantity(quantity)) {
-        char isbn[isbn_len + 1]{};
-        strcpy(isbn, list[1].data());
-        const double income = MyBook.Buy(isbn, quantity);
+        const double income = MyBook.Buy(list[1], quantity);
         if (income == -1) {
           cout << "Invalid\n";
         } else {
