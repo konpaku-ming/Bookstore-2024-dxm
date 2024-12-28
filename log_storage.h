@@ -157,7 +157,10 @@ public:
     Log temp{};
     for (int i = 1; i <= total; i++) {
       Read(temp, i);
-      cout << temp.id << "\t";
+      if (temp.id != "") {
+        cout << temp.id << "\t";
+      } else
+        cout << "visitor\t";
       if (temp.op == kSu) {
         cout << "su\n";
       } else if (temp.op == kLogout) {
@@ -193,7 +196,10 @@ public:
       if (temp.privilege != 3) {
         continue;
       }
-      cout << temp.id << "\t";
+      if (temp.id != "") {
+        cout << temp.id << "\t";
+      } else
+        cout << "visitor\t";
       if (temp.op == kSu) {
         cout << "su\n";
       } else if (temp.op == kLogout) {

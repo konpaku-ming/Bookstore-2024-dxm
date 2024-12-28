@@ -119,9 +119,11 @@ int main() {
     } else if (list[0] == "su") {
       if (!user_stack.empty()) {
         strcpy(now.id, user_stack.back().c_str());
-        now.op = kSu;
-        now.privilege = MyUser.cur_privilege;
+      } else {
+        strcpy(now.id, "visitor");
       }
+      now.op = kSu;
+      now.privilege = MyUser.cur_privilege;
       switch (list.size()) {
       case 2: {
         selected_book_stack.push_back(MyBook.selected_book_idx);
@@ -177,9 +179,11 @@ int main() {
       }
       if (!user_stack.empty()) {
         strcpy(now.id, user_stack.back().c_str());
-        now.op = kSu;
-        now.privilege = MyUser.cur_privilege;
+      } else {
+        strcpy(now.id, "visitor");
       }
+      now.op = kRegister;
+      now.privilege = MyUser.cur_privilege;
       if (IsId(list[1]) && IsPassword(list[2]) && IsUserName(list[3])) {
         auto x = new Account(list[1], list[2], list[3], 1);
         if (MyUser.Signup(*x)) {
@@ -595,6 +599,24 @@ int main() {
       }
       MyFinance.Write(-cost);
       MyLog.Push(now);
+    } else if (list[0] == "report") {
+      if (list.size() != 2 || MyUser.cur_privilege != 7) {
+        cout << "Invalid\n";
+        continue;
+      }
+      if (list[1] == "finance") {
+        MyLog.ReportFinance();
+      } else if (list[1] == "employee") {
+        MyLog.ReportEmployee();
+      } else {
+        cout << "Invalid\n";
+      }
+    } else if (list[0] == "log") {
+      if (list.size() != 1 || MyUser.cur_privilege != 7) {
+        cout << "Invalid\n";
+        continue;
+      }
+      MyLog.ReportLog();
     } else {
       cout << "Invalid\n";
     }
