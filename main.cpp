@@ -13,6 +13,7 @@
 BookDatabase MyBook;
 AccountDatabase MyUser;
 FinanceDatabase MyFinance("finance_log");
+LogDatabase MyLog;
 std::vector<string> user_stack;
 std::vector<int> selected_book_stack;
 using std::cin;
@@ -94,11 +95,14 @@ int main() {
   MyBook.Restore();
   MyUser.Init();
   MyUser.Restore();
+  MyLog.Init();
+  MyLog.Restore();
   MyFinance.Init("finance_log");
   MyFinance.Restore();
   string cmd;
   std::vector<string> list;
   while (getline(cin, cmd)) {
+    Log now{};
     if (cmd.length() > 1024) {
       cout << "Invalid\n";
       continue;
@@ -113,12 +117,18 @@ int main() {
         break;
       }
     } else if (list[0] == "su") {
+      if (!user_stack.empty()) {
+        strcpy(now.id, user_stack.back().c_str());
+        now.op = kSu;
+        now.privilege = MyUser.cur_privilege;
+      }
       switch (list.size()) {
       case 2: {
         selected_book_stack.push_back(MyBook.selected_book_idx);
-        if (MyUser.Login(list[1], ""))
+        if (MyUser.Login(list[1], "")) {
           user_stack.push_back(list[1]);
-        else {
+          MyLog.Push(now);
+        } else {
           selected_book_stack.pop_back();
           cout << "Invalid\n";
         }
@@ -126,9 +136,10 @@ int main() {
       }
       case 3: {
         selected_book_stack.push_back(MyBook.selected_book_idx);
-        if (MyUser.Login(list[1], list[2]))
+        if (MyUser.Login(list[1], list[2])) {
           user_stack.push_back(list[1]);
-        else {
+          MyLog.Push(now);
+        } else {
           selected_book_stack.pop_back();
           cout << "Invalid\n";
         }
@@ -141,6 +152,12 @@ int main() {
       if (list.size() != 1 || MyUser.cur_privilege < 1 || user_stack.empty())
         cout << "Invalid\n";
       else {
+        if (!user_stack.empty()) {
+          strcpy(now.id, user_stack.back().c_str());
+          now.op = kLogout;
+          now.privilege = MyUser.cur_privilege;
+        }
+        MyLog.Push(now);
         user_stack.pop_back();
         MyBook.selected_book_idx = selected_book_stack.back();
         selected_book_stack.pop_back();
@@ -158,10 +175,16 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
+      if (!user_stack.empty()) {
+        strcpy(now.id, user_stack.back().c_str());
+        now.op = kSu;
+        now.privilege = MyUser.cur_privilege;
+      }
       if (IsId(list[1]) && IsPassword(list[2]) && IsUserName(list[3])) {
         auto x = new Account(list[1], list[2], list[3], 1);
         if (MyUser.Signup(*x)) {
           delete x;
+          MyLog.Push(now);
           continue;
         }
         delete x;
@@ -170,6 +193,11 @@ int main() {
         cout << "Invalid\n";
       }
     } else if (list[0] == "passwd") {
+      if (!user_stack.empty()) {
+        strcpy(now.id, user_stack.back().c_str());
+        now.op = kSu;
+        now.privilege = MyUser.cur_privilege;
+      }
       char id[id_len + 1]{};
       char password[password_len + 1]{};
       char new_password[password_len + 1]{};
@@ -183,6 +211,8 @@ int main() {
         strcpy(new_password, list[2].c_str());
         if (!MyUser.ChangePassword(id, "", new_password)) {
           cout << "Invalid\n";
+        } else {
+          MyLog.Push(now);
         }
         break;
       }
@@ -196,6 +226,8 @@ int main() {
         strcpy(new_password, list[3].c_str());
         if (!MyUser.ChangePassword(id, password, new_password)) {
           cout << "Invalid\n";
+        } else {
+          MyLog.Push(now);
         }
         break;
       }
@@ -211,12 +243,18 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
+      if (!user_stack.empty()) {
+        strcpy(now.id, user_stack.back().c_str());
+        now.op = kUseradd;
+        now.privilege = MyUser.cur_privilege;
+      }
       const int privilege_ = StringToInt(list[3]);
       if (IsId(list[1]) && IsPassword(list[2]) && IsUserName(list[4]) &&
           IsPrivilege(privilege_)) {
         auto x = new Account(list[1], list[2], list[4], privilege_);
         if (MyUser.AddUser(*x)) {
           delete x;
+          MyLog.Push(now);
           continue;
         }
         delete x;
@@ -234,6 +272,11 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
+      if (!user_stack.empty()) {
+        strcpy(now.id, user_stack.back().c_str());
+        now.op = kDelete;
+        now.privilege = MyUser.cur_privilege;
+      }
       char id_[id_len + 1]{};
       strcpy(id_, list[1].c_str());
       if (list.size() != 2) {
@@ -242,6 +285,8 @@ int main() {
       }
       if (!MyUser.Delete(id_)) {
         cout << "Invalid\n";
+      } else {
+        MyLog.Push(now);
       }
     } else if (list[0] == "show") { // 这里注意可能有两种命令
       if (list.size() > 1 && list[1] == "finance") {
@@ -251,7 +296,7 @@ int main() {
         }
         switch (list.size()) {
         case 2: {
-          MyFinance.FinanceReport(MyFinance.info_len);
+          MyFinance.FinanceShow(MyFinance.info_len);
           break;
         }
         case 3: {
@@ -264,7 +309,7 @@ int main() {
             cout << "Invalid\n";
             break;
           }
-          if (!MyFinance.FinanceReport(count)) {
+          if (!MyFinance.FinanceShow(count)) {
             cout << "Invalid\n";
           }
           break;
@@ -277,9 +322,15 @@ int main() {
           cout << "Invalid\n";
           continue;
         }
+        if (!user_stack.empty()) {
+          strcpy(now.id, user_stack.back().c_str());
+          now.op = kShow;
+          now.privilege = MyUser.cur_privilege;
+        }
         switch (list.size()) {
         case 1: {
           MyBook.AllShow();
+          MyLog.Push(now);
           break;
         }
         case 2: {
@@ -294,6 +345,7 @@ int main() {
               cout << "Invalid\n";
             } else {
               MyBook.IsbnShow(s);
+              MyLog.Push(now);
             }
           } else if (p.first == "-name") {
             if (s.length() <= 2 || s.front() != '\"' || s.back() != '\"') {
@@ -306,6 +358,7 @@ int main() {
               break;
             }
             MyBook.NameShow(s);
+            MyLog.Push(now);
           } else if (p.first == "-author") {
             if (s.length() <= 2 || s.front() != '\"' || s.back() != '\"') {
               cout << "Invalid\n";
@@ -319,6 +372,7 @@ int main() {
             char author[name_len + 1]{};
             strcpy(author, s.data());
             MyBook.AuthorShow(author);
+            MyLog.Push(now);
           } else if (p.first == "-keyword") {
             if (s.length() <= 2 || s.front() != '\"' || s.back() != '\"') {
               cout << "Invalid\n";
@@ -330,6 +384,7 @@ int main() {
               break;
             }
             MyBook.KeywordShow(s);
+            MyLog.Push(now);
           } else {
             cout << "Invalid\n";
           }
@@ -348,12 +403,19 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
+      if (!user_stack.empty()) {
+        strcpy(now.id, user_stack.back().c_str());
+        now.op = kBuy;
+        now.privilege = MyUser.cur_privilege;
+      }
       const long long quantity = StringToInt(list[2]);
       if (IsIsbn(list[1]) && IsQuantity(quantity)) {
         const double income = MyBook.Buy(list[1], quantity);
         if (income == -1) {
           cout << "Invalid\n";
         } else {
+          now.finance = income;
+          MyLog.Push(now);
           cout << std::fixed << std::setprecision(2) << income << '\n';
           MyFinance.Write(income);
         }
@@ -365,8 +427,14 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
+      if (!user_stack.empty()) {
+        strcpy(now.id, user_stack.back().c_str());
+        now.op = kSelect;
+        now.privilege = MyUser.cur_privilege;
+      }
       if (IsIsbn(list[1])) {
         MyBook.Select(list[1]);
+        MyLog.Push(now);
       } else {
         cout << "Invalid\n";
       }
@@ -481,6 +549,12 @@ int main() {
       }
       if (!isvalid)
         continue;
+      if (!user_stack.empty()) {
+        strcpy(now.id, user_stack.back().c_str());
+        now.op = kModify;
+        now.privilege = MyUser.cur_privilege;
+      }
+      MyLog.Push(now);
       for (int i = 1; i < list.size(); i++) {
         if (p[i].first == "-name") {
           MyBook.NameModify(p[i].second);
@@ -504,6 +578,11 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
+      if (!user_stack.empty()) {
+        strcpy(now.id, user_stack.back().c_str());
+        now.op = kSu;
+        now.privilege = MyUser.cur_privilege;
+      }
       const long long x = StringToInt(list[1]);
       const double cost = StringToDouble(list[2]);
       if (!IsQuantity(x) || !IsTotalCost(cost)) {
@@ -515,6 +594,7 @@ int main() {
         continue;
       }
       MyFinance.Write(-cost);
+      MyLog.Push(now);
     } else {
       cout << "Invalid\n";
     }
@@ -522,5 +602,6 @@ int main() {
   MyUser.Save();
   MyBook.Save();
   MyFinance.Save();
+  MyLog.Save();
   return 0;
 }
