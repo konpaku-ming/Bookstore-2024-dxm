@@ -162,29 +162,35 @@ public:
       } else
         cout << "visitor\t";
       if (temp.op == kSu) {
-        cout << "su\n";
+        cout << "su\t";
       } else if (temp.op == kLogout) {
-        cout << "logout\n";
+        cout << "logout\t";
       } else if (temp.op == kRegister) {
-        cout << "register\n";
+        cout << "register\t";
       } else if (temp.op == kPasswd) {
-        cout << "passwd\n";
+        cout << "passwd\t";
       } else if (temp.op == kUseradd) {
-        cout << "useradd\n";
+        cout << "useradd\t";
       } else if (temp.op == kDelete) {
-        cout << "delete\n";
+        cout << "delete\t";
       } else if (temp.op == kShow) {
-        cout << "show\n";
+        cout << "show\t";
       } else if (temp.op == kBuy) {
-        cout << "buy\t" << std::fixed << std::setprecision(2) << temp.finance
-             << "\n";
+        cout << "buy\t";
       } else if (temp.op == kSelect) {
-        cout << "select\n";
+        cout << "select\t";
       } else if (temp.op == kModify) {
-        cout << " modify\n";
+        cout << " modify\t";
       } else if (temp.op == kImport) {
-        cout << "import\t" << std::fixed << std::setprecision(2) << temp.finance
+        cout << "import\t";
+      }
+      if (temp.finance == 0) {
+        cout << "no bill\n";
+      } else if (temp.finance > 0) {
+        cout << "+" << std::fixed << std::setprecision(2) << temp.finance
              << "\n";
+      } else if (temp.finance < 0) {
+        cout << std::fixed << std::setprecision(2) << temp.finance << "\n";
       }
     }
   }
@@ -201,29 +207,35 @@ public:
       } else
         cout << "visitor\t";
       if (temp.op == kSu) {
-        cout << "su\n";
+        cout << "su\t";
       } else if (temp.op == kLogout) {
-        cout << "logout\n";
+        cout << "logout\t";
       } else if (temp.op == kRegister) {
-        cout << "register\n";
+        cout << "register\t";
       } else if (temp.op == kPasswd) {
-        cout << "passwd\n";
+        cout << "passwd\t";
       } else if (temp.op == kUseradd) {
-        cout << "useradd\n";
+        cout << "useradd\t";
       } else if (temp.op == kDelete) {
-        cout << "delete\n";
+        cout << "delete\t";
       } else if (temp.op == kShow) {
-        cout << "show\n";
+        cout << "show\t";
       } else if (temp.op == kBuy) {
-        cout << "buy\t" << std::fixed << std::setprecision(2) << temp.finance
-             << "\n";
+        cout << "buy\t";
       } else if (temp.op == kSelect) {
-        cout << "select\n";
+        cout << "select\t";
       } else if (temp.op == kModify) {
-        cout << " modify\n";
+        cout << " modify\t";
       } else if (temp.op == kImport) {
-        cout << "import\t" << std::fixed << std::setprecision(2) << temp.finance
+        cout << "import\t";
+      }
+      if (temp.finance == 0) {
+        cout << "no bill\n";
+      } else if (temp.finance > 0) {
+        cout << "+" << std::fixed << std::setprecision(2) << temp.finance
              << "\n";
+      } else if (temp.finance < 0) {
+        cout << std::fixed << std::setprecision(2) << temp.finance << "\n";
       }
     }
   }
@@ -234,10 +246,13 @@ public:
       Read(temp, i);
       if (temp.op == kBuy) {
         cout << temp.id << "\t"
-             << "buy\t" << temp.finance << "\n";
+             << "buy\t"
+             << "+" << std::fixed << std::setprecision(2) << temp.finance
+             << "\n";
       } else if (temp.op == kImport) {
         cout << temp.id << "\t"
-             << "import\t" << temp.finance << "\n";
+             << "import\t" << std::fixed << std::setprecision(2) << temp.finance
+             << "\n";
       }
     }
   }
