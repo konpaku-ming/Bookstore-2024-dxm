@@ -584,7 +584,7 @@ int main() {
       }
       if (!user_stack.empty()) {
         strcpy(now.id, user_stack.back().c_str());
-        now.op = kSu;
+        now.op = kImport;
         now.privilege = MyUser.cur_privilege;
       }
       const long long x = StringToInt(list[1]);
@@ -597,6 +597,7 @@ int main() {
         cout << "Invalid\n";
         continue;
       }
+      now.finance = -cost;
       MyFinance.Write(-cost);
       MyLog.Push(now);
     } else if (list[0] == "report") {

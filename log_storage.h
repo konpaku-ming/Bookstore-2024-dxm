@@ -160,29 +160,41 @@ public:
       if (temp.id != "") {
         cout << temp.id << "\t";
       } else
-        cout << "visitor\t";
+        cout << "visitor"
+             << "\t";
       if (temp.op == kSu) {
-        cout << "su\t";
+        cout << "su"
+             << "\t";
       } else if (temp.op == kLogout) {
-        cout << "logout\t";
+        cout << "logout"
+             << "\t";
       } else if (temp.op == kRegister) {
-        cout << "register\t";
+        cout << "register"
+             << "\t";
       } else if (temp.op == kPasswd) {
-        cout << "passwd\t";
+        cout << "passwd"
+             << "\t";
       } else if (temp.op == kUseradd) {
-        cout << "useradd\t";
+        cout << "useradd"
+             << "\t";
       } else if (temp.op == kDelete) {
-        cout << "delete\t";
+        cout << "delete"
+             << "\t";
       } else if (temp.op == kShow) {
-        cout << "show\t";
+        cout << "show"
+             << "\t";
       } else if (temp.op == kBuy) {
-        cout << "buy\t";
+        cout << "buy"
+             << "\t";
       } else if (temp.op == kSelect) {
-        cout << "select\t";
+        cout << "select"
+             << "\t";
       } else if (temp.op == kModify) {
-        cout << " modify\t";
+        cout << "modify"
+             << "\t";
       } else if (temp.op == kImport) {
-        cout << "import\t";
+        cout << "import"
+             << "\t";
       }
       if (temp.finance == 0) {
         cout << "no bill\n";
@@ -205,29 +217,41 @@ public:
       if (temp.id != "") {
         cout << temp.id << "\t";
       } else
-        cout << "visitor\t";
+        cout << "visitor"
+             << "\t";
       if (temp.op == kSu) {
-        cout << "su\t";
+        cout << "su"
+             << "\t";
       } else if (temp.op == kLogout) {
-        cout << "logout\t";
+        cout << "logout"
+             << "\t";
       } else if (temp.op == kRegister) {
-        cout << "register\t";
+        cout << "register"
+             << "\t";
       } else if (temp.op == kPasswd) {
-        cout << "passwd\t";
+        cout << "passwd"
+             << "\t";
       } else if (temp.op == kUseradd) {
-        cout << "useradd\t";
+        cout << "useradd"
+             << "\t";
       } else if (temp.op == kDelete) {
-        cout << "delete\t";
+        cout << "delete"
+             << "\t";
       } else if (temp.op == kShow) {
-        cout << "show\t";
+        cout << "show"
+             << "\t";
       } else if (temp.op == kBuy) {
-        cout << "buy\t";
+        cout << "buy"
+             << "\t";
       } else if (temp.op == kSelect) {
-        cout << "select\t";
+        cout << "select"
+             << "\t";
       } else if (temp.op == kModify) {
-        cout << " modify\t";
+        cout << "modify"
+             << "\t";
       } else if (temp.op == kImport) {
-        cout << "import\t";
+        cout << "import"
+             << "\t";
       }
       if (temp.finance == 0) {
         cout << "no bill\n";
@@ -246,12 +270,14 @@ public:
       Read(temp, i);
       if (temp.op == kBuy) {
         cout << temp.id << "\t"
-             << "buy\t"
+             << "buy"
+             << "\t"
              << "+" << std::fixed << std::setprecision(2) << temp.finance
              << "\n";
       } else if (temp.op == kImport) {
         cout << temp.id << "\t"
-             << "import\t" << std::fixed << std::setprecision(2) << temp.finance
+             << "import"
+             << "\t" << std::fixed << std::setprecision(2) << temp.finance
              << "\n";
       }
     }
